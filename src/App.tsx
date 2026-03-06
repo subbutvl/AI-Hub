@@ -15,6 +15,7 @@ import PipelineBuilder from "./pages/skills/PipelineBuilder";
 import UseCases from "./pages/skills/UseCases";
 import CreateUseCase from "./pages/skills/CreateUseCase";
 import EditUseCase from "./pages/skills/EditUseCase";
+import Help from "./pages/Help";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="/skills/use-cases" element={<UseCases />} />
         <Route path="/skills/use-cases/create" element={<CreateUseCase />} />
         <Route path="/skills/use-cases/edit/:id" element={<EditUseCase />} />
+        <Route path="/help" element={<Help />} />
       </Routes>
     </Router>
   );

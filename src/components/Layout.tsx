@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Github, LayoutDashboard, Database, Users, Compass, BookOpen, AlertTriangle, X, ChevronDown, Folder, Wrench, Edit, Library, TestTube, GitMerge, Lightbulb, Cpu } from "lucide-react";
+import { Github, LayoutDashboard, Database, Users, Compass, BookOpen, AlertTriangle, X, ChevronDown, Folder, Wrench, Edit, Library, TestTube, GitMerge, Lightbulb, Cpu, HelpCircle } from "lucide-react";
 import { ModeToggle } from "./ModeToggle";
 import { useState, useEffect, useRef } from "react";
 import { errorBus } from "../services/errorBus";
@@ -226,7 +226,16 @@ export function Layout({ children }: LayoutProps) {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link 
+            <Link
+              to="/help"
+              className={`text-muted-foreground hover:text-foreground transition-colors p-2 rounded-md hover:bg-secondary/50 ${
+                location.pathname === "/help" ? "bg-secondary text-secondary-foreground" : ""
+              }`}
+              title="Help & Documentation"
+            >
+              <HelpCircle className="w-5 h-5" />
+            </Link>
+            <Link
               to="/settings"
               className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-md hover:bg-secondary/50"
               title="Settings"
