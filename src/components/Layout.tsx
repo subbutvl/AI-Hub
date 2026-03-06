@@ -174,43 +174,46 @@ export function Layout({ children }: LayoutProps) {
                 {isSkillHubOpen && (
                   <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-popover border border-border shadow-md rounded-md py-1 z-50 flex flex-col animate-in fade-in zoom-in-95 duration-100">
                     <Link 
-                      to="#" 
-                      className="px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                      to="/skills/create" 
+                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
+                        location.pathname === "/skills/create" ? "bg-accent/50 text-accent-foreground" : ""
+                      }`}
                       onClick={() => setIsSkillHubOpen(false)}
                     >
                       <Wrench className="w-4 h-4" /> Create Skill
                     </Link>
                     <Link 
-                      to="#" 
-                      className="px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
-                      onClick={() => setIsSkillHubOpen(false)}
-                    >
-                      <Edit className="w-4 h-4" /> Edit Skill
-                    </Link>
-                    <Link 
-                      to="#" 
-                      className="px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                      to="/skills/library" 
+                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
+                        location.pathname === "/skills/library" ? "bg-accent/50 text-accent-foreground" : ""
+                      }`}
                       onClick={() => setIsSkillHubOpen(false)}
                     >
                       <Library className="w-4 h-4" /> Skill Library
                     </Link>
                     <Link 
-                      to="#" 
-                      className="px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                      to="/skills/test" 
+                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
+                        location.pathname === "/skills/test" ? "bg-accent/50 text-accent-foreground" : ""
+                      }`}
                       onClick={() => setIsSkillHubOpen(false)}
                     >
                       <TestTube className="w-4 h-4" /> Test Skill
                     </Link>
                     <Link 
-                      to="#" 
-                      className="px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                      to="/skills/pipeline" 
+                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
+                        location.pathname === "/skills/pipeline" ? "bg-accent/50 text-accent-foreground" : ""
+                      }`}
                       onClick={() => setIsSkillHubOpen(false)}
                     >
                       <GitMerge className="w-4 h-4" /> Pipeline Builder
                     </Link>
                     <Link 
-                      to="#" 
-                      className="px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                      to="/skills/use-cases" 
+                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
+                        location.pathname === "/skills/use-cases" ? "bg-accent/50 text-accent-foreground" : ""
+                      }`}
                       onClick={() => setIsSkillHubOpen(false)}
                     >
                       <Lightbulb className="w-4 h-4" /> Use Cases
