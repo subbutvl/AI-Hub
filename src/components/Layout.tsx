@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Github, LayoutDashboard, Database, Users, Compass, BookOpen, AlertTriangle, X, ChevronDown, Folder, Wrench, Edit, Library, TestTube, GitMerge, Lightbulb, Cpu, HelpCircle } from "lucide-react";
+import { Github, LayoutDashboard, Database, Users, Compass, BookOpen, AlertTriangle, X, ChevronDown, Folder, Wrench, Edit, Library, TestTube, GitMerge, Lightbulb, Cpu, HelpCircle, Globe } from "lucide-react";
 import { ModeToggle } from "./ModeToggle";
 import { useState, useEffect, useRef } from "react";
 import { errorBus } from "../services/errorBus";
@@ -95,6 +95,20 @@ export function Layout({ children }: LayoutProps) {
                 <Github className="w-4 h-4" />
                 My Repos
               </Link>
+
+              {settings.enableWebHub && (
+                <Link
+                  to="/web-hub"
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+                    location.pathname === "/web-hub"
+                      ? "bg-secondary text-secondary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                  }`}
+                >
+                  <Globe className="w-4 h-4" />
+                  Web Hub
+                </Link>
+              )}
 
               {/* Repo Hub Dropdown */}
               {settings.enableRepoHub && (

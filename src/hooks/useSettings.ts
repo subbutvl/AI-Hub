@@ -3,13 +3,17 @@ import { useState, useEffect } from 'react';
 export interface AppSettings {
   enableRepoHub: boolean;
   enableSkillHub: boolean;
+  enableWebHub: boolean;
   enableBackgroundQuerying: boolean;
+  webHubLayout: 'grid' | 'table';
 }
 
 const defaultSettings: AppSettings = {
   enableRepoHub: true,
   enableSkillHub: true,
+  enableWebHub: true,
   enableBackgroundQuerying: false,
+  webHubLayout: 'grid',
 };
 
 export function useSettings() {

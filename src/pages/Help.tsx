@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {
   BookOpen, Library, Wrench, TestTube, GitMerge, Lightbulb,
   ChevronDown, ChevronRight, Rocket, CheckCircle2, Zap,
-  Bot, Monitor, FileText, Star, ArrowRight, Shield, Info
+  Bot, Monitor, FileText, Star, ArrowRight, Shield, Info, Globe, Users
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -171,108 +171,113 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    id: "use-cases",
-    icon: <Lightbulb className="w-5 h-5" />,
-    title: "Use Cases",
-    color: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-800",
-    badge: "Execute",
-    what: "Use Cases are named, saved configurations that link a descriptive scenario to a reusable Pipeline. They let you say 'I want to run the Full PR Audit pipeline on my Automated Code Review scenario' and execute it as a one-click workflow.",
-    why: "Pipelines are abstract; Use Cases make them concrete. A Use Case tells the story of what you're doing (e.g. 'Customer Support Triage') and wires it to the specific pipeline that gets the job done — making it easy to hand off to teammates or re-run at any time.",
-    where: "Skill Hub menu → Use Cases, or go to /skills/use-cases.",
+    id: "web-hub",
+    icon: <Globe className="w-5 h-5" />,
+    title: "Web Hub",
+    color: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
+    badge: "New",
+    what: "Web Hub is a personal link management system designed for the AI Hub ecosystem. It allows users to store, categorize, and tag web pages, YouTube videos, and GitHub repositories in a highly visual 6-cards-per-row grid.",
+    why: "Centralizing research and resources is critical for building effective AI skills. Web Hub provides a visual, searchable library for these resources with automatic metadata fetching (YouTube & GitHub), keeping your research organized in one place.",
+    where: "Access it via the 'Web Hub' link in the global navigation header (if enabled in Settings), or navigate to /web-hub.",
     how: [
-      { step: "Gallery View", detail: "Browse all use cases as cards. Each card shows its title, description, pipeline sequence (skill badges), and a 'Run Scenario' button." },
-      { step: "Search", detail: "Use the search bar to find use cases by title or description." },
-      { step: "Sort", detail: "Sort by Name (A–Z, Z–A) or Date (newest/oldest)." },
-      { step: "Create New", detail: "Click '+ New Use Case', give it a title, description, assign a saved pipeline, and choose icon/colour." },
-      { step: "Edit", detail: "Click the pencil icon on a card to open EditUseCase. You can view the pipeline sequence inline and also Run the scenario from within the edit page." },
-      { step: "Delete", detail: "Available inside the Edit Use Case page via the red Delete button." },
-      { step: "Run Scenario", detail: "Click 'Run Scenario' on any card. A simulation dialog animates through each pipeline skill sequentially, then produces a mock PR Comment report with categorised issues." },
-      { step: "Export", detail: "Click 'Export CSV' to download all use cases as a structured CSV file." },
-      { step: "Import", detail: "Click 'Import CSV' to upload a previously exported CSV — duplicates are automatically skipped." },
+      { step: "Add Link", detail: "Click 'Add Link', paste a URL, and use the refresh icon to auto-fetch the title and type-detection." },
+      { step: "Categorize", detail: "Create new categories or select existing ones to group your links logically." },
+      { step: "Tagging", detail: "Add multiple tags to links for advanced cross-category filtering." },
+      { step: "Filter & Sort", detail: "Use type-specific pills (e.g. Video, Shorts) or the search bar/dropdowns to navigate your library." },
+      { step: "Data Portability", detail: "Use the Import/Export CSV tools to backup your local library or share it across devices." },
     ],
     bestPractices: [
-      "Create separate Use Cases for different team workflows (e.g. 'Backend PR Review' vs 'Frontend PR Review').",
-      "Always assign a real saved pipeline to a Use Case — 'No Pipeline' use cases cannot be meaningfully executed.",
-      "Use the description field to explain the trigger and expected outcome of the use case.",
-      "Choose a meaningful icon and colour to make cards visually distinguishable at a glance.",
-      "Export Use Cases to CSV before making bulk changes — it serves as an easy backup.",
+      "Always use the Auto-Fetch tool for YouTube/GitHub URLs to get accurate metadata instantly.",
+      "Assign one category per link but multiple tags for better discovery.",
+      "Periodically export your library to CSV as data is stored locally in your browser cache.",
+      "Use the 'Article' or 'Tool' types for non-video/repo resources to keep icons consistent.",
     ],
     tips: [
-      "The Run Scenario report is a simulation for demo purposes only. Results are mocked.",
-      "Importing a CSV does not overwrite existing use cases — it only adds missing ones.",
+      "YouTube Shorts, Playlists, and Channels have distinct color-coded icons to help you scan your library faster.",
+      "Hover over any link card to reveal quick-actions like Edit, Delete, and Open Link.",
     ],
   },
 ];
 
 const FUTURE_ENHANCEMENTS = [
   {
-    category: "🔌 Backend Integration",
-    icon: <Zap className="w-4 h-4" />,
-    items: [
-      "Connect skills to real LLM APIs (OpenAI, Google Gemini, Anthropic Claude) for live execution.",
-      "Persist pipelines and use cases in a cloud database (PostgreSQL / Firestore) for team-level sharing.",
-      "Webhook triggers — automatically run a pipeline when a GitHub PR is opened.",
-      "OAuth integration with GitHub to directly fetch PR diffs as skill input.",
-    ],
-  },
-  {
-    category: "🤝 Collaboration",
+    category: "🏪 AI Skill Marketplace",
     icon: <Star className="w-4 h-4" />,
     items: [
-      "Team workspaces — share skills, pipelines, and use cases across organisations.",
-      "Skill versioning with Git-style branching and merge-request reviews.",
-      "Role-based access control (admin, editor, viewer) for the skill library.",
-      "Comments and annotations on skills and pipelines for async review.",
+      "Browse thousands of community skills",
+      "Rate and review skills",
+      "Premium skill subscriptions",
+      "Verified skill creators",
     ],
   },
   {
-    category: "📊 Analytics & Reporting",
-    icon: <BookOpen className="w-4 h-4" />,
-    items: [
-      "Execution history — log every pipeline run, with timestamps and skill-level outputs.",
-      "Quality metrics dashboard — track how many issues each skill finds over time.",
-      "Skill effectiveness scores based on which suggestions were accepted by developers.",
-      "Exportable PDF reports from pipeline execution results.",
-    ],
-  },
-  {
-    category: "🧩 Ecosystem & Integrations",
-    icon: <Bot className="w-4 h-4" />,
-    items: [
-      "IDE extensions (VS Code, Cursor) that run skills directly from the editor context menu.",
-      "CLI tool to execute pipelines from the command line or CI/CD scripts.",
-      "GitHub/GitLab bot that posts AI review comments automatically on new PRs.",
-      "Marketplace for sharing and discovering community-authored skills.",
-    ],
-  },
-  {
-    category: "⚙️ Pipeline Builder Enhancements",
+    category: "📂 Skill Versioning",
     icon: <GitMerge className="w-4 h-4" />,
     items: [
-      "Parallel execution branches — run independent skills simultaneously for speed.",
-      "Conditional nodes — skip a skill based on the output of a previous one.",
-      "Visual canvas editor with drag-and-drop between branching paths.",
-      "Pipeline templates — pre-built starters for common workflows (security audit, documentation pass, etc.).",
+      "Semantic versioning support",
+      "Skill dependency graphs",
+      "Automatic migration tools",
+      "Rollback capabilities",
     ],
   },
   {
-    category: "🛡️ Security & Compliance",
-    icon: <Shield className="w-4 h-4" />,
+    category: "👥 Team Skill Sharing",
+    icon: <Users className="w-4 h-4" />,
     items: [
-      "On-premise / private-cloud deployment mode with no data leaving the organisation.",
-      "Audit logs for all skill creation, editing, and pipeline execution events.",
-      "PII redaction step that strips sensitive data before sending payloads to LLMs.",
-      "Skill content moderation to prevent prompt injection or policy violations.",
+      "Private team repositories",
+      "Skill access controls",
+      "Collaborative editing",
+      "Approval workflows",
     ],
   },
   {
-    category: "📱 Platform Expansion",
+    category: "📈 AI Skill Analytics",
+    icon: <BookOpen className="w-4 h-4" />,
+    items: [
+      "Execution metrics",
+      "Performance tracking",
+      "Cost analysis",
+      "Usage reports",
+    ],
+  },
+  {
+    category: "🗺️ Skill Composition",
     icon: <Monitor className="w-4 h-4" />,
     items: [
-      "Mobile-optimised interface for reviewing AI reports on-the-go.",
-      "Embeddable widget to surface AI review results inside Jira, Linear, or Notion.",
-      "Slack/Teams bot integration — receive pipeline results as formatted channel messages.",
-      "Public API (REST + GraphQL) so any tool can create skills and trigger pipelines programmatically.",
+      "Visual workflow builder",
+      "Conditional branching",
+      "Parallel execution",
+      "Error handling",
+    ],
+  },
+  {
+    category: "🌐 Multi-Language Support",
+    icon: <FileText className="w-4 h-4" />,
+    items: [
+      "Language-agnostic patterns",
+      "Auto-detection",
+      "Cross-language suggestions",
+      "Universal best practices",
+    ],
+  },
+  {
+    category: "💬 Real-time Collaboration",
+    icon: <Bot className="w-4 h-4" />,
+    items: [
+      "Live editing sessions",
+      "Shared skill testing",
+      "Team chat integration",
+      "Presence indicators",
+    ],
+  },
+  {
+    category: "🛡️ Enterprise Security",
+    icon: <Shield className="w-4 h-4" />,
+    items: [
+      "SOC 2 compliance",
+      "Audit logging",
+      "Secret management",
+      "RBAC controls",
     ],
   },
 ];
@@ -483,6 +488,7 @@ export default function Help() {
                   { label: "Test Skill", to: "/skills/test", icon: <TestTube className="w-4 h-4" /> },
                   { label: "Pipeline Builder", to: "/skills/pipeline", icon: <GitMerge className="w-4 h-4" /> },
                   { label: "Use Cases", to: "/skills/use-cases", icon: <Lightbulb className="w-4 h-4" /> },
+                  { label: "Web Hub", to: "/web-hub", icon: <Globe className="w-4 h-4" /> },
                   { label: "Settings", to: "/settings", icon: <Shield className="w-4 h-4" /> },
                 ].map(item => (
                   <Link

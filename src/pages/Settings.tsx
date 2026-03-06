@@ -2,7 +2,8 @@ import { Layout } from "../components/Layout";
 import { useSettings } from "../hooks/useSettings";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Settings as SettingsIcon } from "lucide-react";
+import { Settings as SettingsIcon, LayoutGrid, List } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Settings() {
   const { settings, updateSettings } = useSettings();
@@ -51,6 +52,66 @@ export default function Settings() {
                 checked={settings.enableSkillHub}
                 onCheckedChange={(checked) => updateSettings({ enableSkillHub: checked })}
               />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="enable-web-hub" className="text-base font-medium">Enable Web Hub</Label>
+                <p className="text-sm text-muted-foreground">
+                  Displays the Web Hub bookmark manager in the navigation menu.
+                </p>
+              </div>
+              <Switch 
+                id="enable-web-hub" 
+                checked={settings.enableWebHub}
+                onCheckedChange={(checked) => updateSettings({ enableWebHub: checked })}
+              />
+            </div>
+          </div>
+
+          {/* Web Hub Features */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold border-b border-border pb-2">Web Hub Features</h2>
+            <p className="text-sm text-muted-foreground">
+              Web Hub is your personal bookmark manager for the AI ecosystem, stored locally in your browser.
+            </p>
+            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside border-l-2 border-primary/20 pl-4">
+              <li><b>Auto-Fetch:</b> Metadata (name, type) fetched via YouTube oEmbed & GitHub API.</li>
+              <li><b>Categorization:</b> Create custom categories and multi-tag links for easy filtering.</li>
+              <li><b>Visuals:</b> Type-specific color-coded icons (Red for Video, Pink for Shorts, etc.).</li>
+              <li><b>Portability:</b> Export your library to CSV or import links from other sources.</li>
+            </ul>
+            <div className="pt-4 border-t border-border/50 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Default Layout</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Choose how your links are displayed by default.
+                  </p>
+                </div>
+                <Select 
+                  value={settings.webHubLayout} 
+                  onValueChange={(v) => updateSettings({ webHubLayout: v as 'grid' | 'table' })}
+                >
+                  <SelectTrigger className="w-36 h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="grid">
+                      <div className="flex items-center gap-2">
+                        <LayoutGrid className="w-3.5 h-3.5" />
+                        <span>Grid View</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="table">
+                      <div className="flex items-center gap-2">
+                        <List className="w-3.5 h-3.5" />
+                        <span>Table View</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
