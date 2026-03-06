@@ -35,10 +35,34 @@ export function useRepoStore() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   };
 
+  const importRepos = (reposToImport: SavedRepo[]) => {
+    setRepos(prevRepos => {
+      const existingIds = new Set(prevRepos.map(r => r.id));
+      const newRepos = [...prevRepos];
+      
+      reposToImport.forEach(repo => {
+        if (!repo.id || !repo.owner || !repo.name) return;
+        
+        const existingIndex = newRepos.findIndex(r => r.id === repo.id);
+        if (existingIndex >= 0) {
+          // Update existing
+          newRepos[existingIndex] = repo;
+        } else {
+          // Add new
+          newRepos.unshift(repo);
+          existingIds.add(repo.id);
+        }
+      });
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newRepos));
+      return newRepos;
+    });
+  };
+
   const getCategories = () => {
     const categories = new Set(repos.map(r => r.category).filter(Boolean));
     return Array.from(categories);
   };
 
-  return { repos, addRepo, updateRepo, removeRepo, getCategories };
+  return { repos, addRepo, updateRepo, removeRepo, importRepos, getCategories };
 }

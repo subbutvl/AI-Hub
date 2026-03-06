@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select"
 
 export default function MyRepos() {
-  const { repos, addRepo, updateRepo, removeRepo, getCategories } = useRepoStore();
+  const { repos, addRepo, updateRepo, removeRepo, importRepos, getCategories } = useRepoStore();
   const categories = getCategories();
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'stars' | 'forks'>('date');
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -40,28 +40,8 @@ export default function MyRepos() {
   }, [repos, sortBy]);
 
   const handleImport = (importedData: SavedRepo[]) => {
-    // We need to be careful not to duplicate IDs or overwrite existing data blindly.
-    // However, for simplicity, we'll iterate and add if not exists, or update?
-    // The useRepoStore `addRepo` just prepends. It doesn't check for duplicates.
-    // We should probably check for duplicates here.
-    
-    let addedCount = 0;
-    const existingIds = new Set(repos.map(r => r.id));
-
-    importedData.forEach(repo => {
-        if (!repo.id || !repo.owner || !repo.name) return; // Basic validation
-
-        if (existingIds.has(repo.id)) {
-            // Update existing? Or skip? Let's update.
-            updateRepo(repo);
-        } else {
-            addRepo(repo);
-            existingIds.add(repo.id);
-            addedCount++;
-        }
-    });
-    
-    alert(`Import process complete. Added ${addedCount} new repositories.`);
+    importRepos(importedData);
+    alert(`Import process complete. Added ${importedData.length} repositories.`);
   };
 
   return (

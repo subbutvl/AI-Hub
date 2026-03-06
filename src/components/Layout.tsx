@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Github, LayoutDashboard, Database, Users, Compass, BookOpen, AlertTriangle, X, ChevronDown, Folder } from "lucide-react";
+import { Github, LayoutDashboard, Database, Users, Compass, BookOpen, AlertTriangle, X, ChevronDown, Folder, Wrench, Edit, Library, TestTube, GitMerge, Lightbulb, Cpu } from "lucide-react";
 import { ModeToggle } from "./ModeToggle";
 import { useState, useEffect, useRef } from "react";
 import { errorBus } from "../services/errorBus";
@@ -13,6 +13,8 @@ export function Layout({ children }: LayoutProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isRepoHubOpen, setIsRepoHubOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isSkillHubOpen, setIsSkillHubOpen] = useState(false);
+  const skillHubDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const unsubscribe = errorBus.subscribe((msg) => {
@@ -25,6 +27,9 @@ export function Layout({ children }: LayoutProps) {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsRepoHubOpen(false);
+      }
+      if (skillHubDropdownRef.current && !skillHubDropdownRef.current.contains(event.target as Node)) {
+        setIsSkillHubOpen(false);
       }
     };
 
@@ -139,6 +144,69 @@ export function Layout({ children }: LayoutProps) {
                       onClick={() => setIsRepoHubOpen(false)}
                     >
                       <Compass className="w-4 h-4" /> AI Explorer
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Skill Hub Dropdown */}
+              <div className="relative" ref={skillHubDropdownRef}>
+                <button
+                  onClick={() => setIsSkillHubOpen(!isSkillHubOpen)}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+                    isSkillHubOpen
+                      ? "bg-secondary text-secondary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                  }`}
+                >
+                  <Cpu className="w-4 h-4" />
+                  Skill Hub
+                  <ChevronDown className={`w-4 h-4 transition-transform ${isSkillHubOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {isSkillHubOpen && (
+                  <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-popover border border-border shadow-md rounded-md py-1 z-50 flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                    <Link 
+                      to="#" 
+                      className="px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                      onClick={() => setIsSkillHubOpen(false)}
+                    >
+                      <Wrench className="w-4 h-4" /> Create Skill
+                    </Link>
+                    <Link 
+                      to="#" 
+                      className="px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                      onClick={() => setIsSkillHubOpen(false)}
+                    >
+                      <Edit className="w-4 h-4" /> Edit Skill
+                    </Link>
+                    <Link 
+                      to="#" 
+                      className="px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                      onClick={() => setIsSkillHubOpen(false)}
+                    >
+                      <Library className="w-4 h-4" /> Skill Library
+                    </Link>
+                    <Link 
+                      to="#" 
+                      className="px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                      onClick={() => setIsSkillHubOpen(false)}
+                    >
+                      <TestTube className="w-4 h-4" /> Test Skill
+                    </Link>
+                    <Link 
+                      to="#" 
+                      className="px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                      onClick={() => setIsSkillHubOpen(false)}
+                    >
+                      <GitMerge className="w-4 h-4" /> Pipeline Builder
+                    </Link>
+                    <Link 
+                      to="#" 
+                      className="px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                      onClick={() => setIsSkillHubOpen(false)}
+                    >
+                      <Lightbulb className="w-4 h-4" /> Use Cases
                     </Link>
                   </div>
                 )}
