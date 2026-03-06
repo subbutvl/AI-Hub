@@ -3,6 +3,8 @@ export interface Skill {
   name: string;
   category: string;
   language?: string;
+  agents?: string[];
+  ides?: string[];
   description: string;
   tags: string[];
   version: string;
@@ -35,14 +37,18 @@ Explain the context or role the AI should assume when executing this skill.
 `;
 
 export function exportSkillAsMarkdown(skill: Partial<Skill>): string {
-  const { name, version, category, language, description, tags, instructions, createdAt, updatedAt } = skill;
+  const { name, version, category, language, agents, ides, description, tags, instructions, createdAt, updatedAt } = skill;
   
   const tagString = tags && tags.length > 0 ? tags.map(t => `\`${t}\``).join(', ') : 'None';
+  const agentString = agents && agents.length > 0 ? agents.join(', ') : 'None';
+  const ideString = ides && ides.length > 0 ? ides.join(', ') : 'None';
   
   return `# ${name || 'Untitled Skill'}
 **Version**: ${version || '1.0.0'}
 **Category**: ${category || 'Uncategorized'}
 **Language**: ${language || 'Any/None'}
+**Coding Agents**: ${agentString}
+**IDEs**: ${ideString}
 **Created**: ${createdAt ? new Date(createdAt).toLocaleString() : 'Unknown'}
 **Last Updated**: ${updatedAt ? new Date(updatedAt).toLocaleString() : 'Unknown'}
 **Tags**: ${tagString}

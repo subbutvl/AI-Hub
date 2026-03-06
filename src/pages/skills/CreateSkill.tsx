@@ -7,9 +7,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Download, FileSignature, Save, Clock, CalendarDays } from "lucide-react";
+import { Download, FileSignature, Save, Clock, CalendarDays, Bot, Monitor } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { MultiSelect } from "@/src/components/ui/multi-select";
+
+const CODING_AGENTS = [
+  "GitHub Copilot",
+  "Claude Sonnet 4.5",
+  "Claude Opus 4",
+  "Gemini 2.5 Pro",
+  "Gemini 2.0 Flash",
+  "GPT-4o",
+  "GPT-o3",
+  "Grok 3",
+  "Mistral Large",
+  "DeepSeek R2",
+  "Amazon Q Developer",
+];
+
+const IDES = [
+  "VS Code",
+  "Cursor",
+  "Windsurf",
+  "Trae",
+  "Visual Studio",
+  "JetBrains (IntelliJ / WebStorm)",
+  "Neovim",
+  "Zed",
+  "Eclipse",
+  "Xcode",
+];
 
 export default function CreateSkill() {
   const navigate = useNavigate();
@@ -27,6 +55,8 @@ export default function CreateSkill() {
   const [description, setDescription] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [agents, setAgents] = useState<string[]>([]);
+  const [ides, setIdes] = useState<string[]>([]);
   
   // Editor state
   const [instructions, setInstructions] = useState("");
@@ -59,15 +89,7 @@ export default function CreateSkill() {
   const handleDownload = () => {
     const finalCategory = category === "new" ? newCategory : category;
     const finalLanguage = language === "new" ? newLanguage : language;
-    const skillData = {
-      name,
-      category: finalCategory,
-      language: finalLanguage,
-      version,
-      description,
-      tags,
-      instructions
-    };
+    const skillData = { name, category: finalCategory, language: finalLanguage, agents, ides, version, description, tags, instructions };
     
     const mdContent = exportSkillAsMarkdown(skillData);
     
@@ -96,6 +118,8 @@ export default function CreateSkill() {
       name,
       category: finalCategory || "Uncategorized",
       language: finalLanguage || undefined,
+      agents,
+      ides,
       version,
       description,
       tags,
@@ -191,6 +215,30 @@ export default function CreateSkill() {
                     className="mt-2"
                   />
                 )}
+              </div>
+
+              {/* Coding Agents */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5"><Bot className="w-3.5 h-3.5" /> Coding Agents</Label>
+                <MultiSelect
+                  options={CODING_AGENTS}
+                  value={agents}
+                  onChange={setAgents}
+                  placeholder="Select coding agents..."
+                />
+                {agents.length === 0 && <p className="text-xs text-muted-foreground">None selected — works with any agent.</p>}
+              </div>
+
+              {/* IDEs */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5"><Monitor className="w-3.5 h-3.5" /> Compatible IDEs</Label>
+                <MultiSelect
+                  options={IDES}
+                  value={ides}
+                  onChange={setIdes}
+                  placeholder="Select compatible IDEs..."
+                />
+                {ides.length === 0 && <p className="text-xs text-muted-foreground">None selected — works in any IDE.</p>}
               </div>
 
               <div className="space-y-2">

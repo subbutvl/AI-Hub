@@ -7,22 +7,48 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Download, FileSignature, Save, Clock, CalendarDays, ArrowLeft } from "lucide-react";
+import { Download, FileSignature, Save, Clock, CalendarDays, ArrowLeft, Bot, Monitor } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { MultiSelect } from "@/src/components/ui/multi-select";
 import { Link } from "react-router-dom";
+
+const CODING_AGENTS = [
+  "GitHub Copilot",
+  "Claude Sonnet 4.5",
+  "Claude Opus 4",
+  "Gemini 2.5 Pro",
+  "Gemini 2.0 Flash",
+  "GPT-4o",
+  "GPT-o3",
+  "Grok 3",
+  "Mistral Large",
+  "DeepSeek R2",
+  "Amazon Q Developer",
+];
+
+const IDES = [
+  "VS Code",
+  "Cursor",
+  "Windsurf",
+  "Trae",
+  "Visual Studio",
+  "JetBrains (IntelliJ / WebStorm)",
+  "Neovim",
+  "Zed",
+  "Eclipse",
+  "Xcode",
+];
 
 export default function EditSkill() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { skills, updateSkill, getCategories, getLanguages } = useSkillStore();
   
-  // Find target skill
   const existingCategories = getCategories();
   const existingLanguages = getLanguages();
   const targetSkill = skills.find(s => s.id === id);
 
-  // Basic info form state
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
@@ -32,16 +58,14 @@ export default function EditSkill() {
   const [description, setDescription] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  
-  // Editor state
+  const [agents, setAgents] = useState<string[]>([]);
+  const [ides, setIdes] = useState<string[]>([]);
   const [instructions, setInstructions] = useState("");
-
-  // Dates
   const [createdAt, setCreatedAt] = useState("");
+  const [isLoaded, setIsLoaded] = useState(false);
+
   const now = new Date();
   const formattedUpdatedDate = now.toLocaleDateString() + " " + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (targetSkill && !isLoaded) {
@@ -49,6 +73,8 @@ export default function EditSkill() {
       setVersion(targetSkill.version);
       setDescription(targetSkill.description || "");
       setTags(targetSkill.tags || []);
+      setAgents(targetSkill.agents || []);
+      setIdes(targetSkill.ides || []);
       setInstructions(targetSkill.instructions || "");
       
       const created = new Date(targetSkill.createdAt);
@@ -74,7 +100,6 @@ export default function EditSkill() {
       
       setIsLoaded(true);
     } else if (id && skills.length > 0 && !targetSkill) {
-      // If we finished loading skills but the ID isn't found, send them back
       navigate("/skills/library");
     }
   }, [targetSkill, navigate, id, skills.length, existingCategories, existingLanguages, isLoaded]);
@@ -101,6 +126,14 @@ export default function EditSkill() {
     setTags(tags.filter(t => t !== tagToRemove));
   };
 
+  const toggleAgent = (agent: string) => {
+    setAgents(agents.includes(agent) ? agents.filter(a => a !== agent) : [...agents, agent]);
+  };
+
+  const toggleIde = (ide: string) => {
+    setIdes(ides.includes(ide) ? ides.filter(i => i !== ide) : [...ides, ide]);
+  };
+
   const handleLoadTemplate = () => {
     if (instructions.trim() && !window.confirm("This will overwrite your current instructions. Continue?")) {
       return;
@@ -111,18 +144,8 @@ export default function EditSkill() {
   const handleDownload = () => {
     const finalCategory = category === "new" ? newCategory : category;
     const finalLanguage = language === "new" ? newLanguage : language;
-    const skillData = {
-      name,
-      category: finalCategory,
-      language: finalLanguage,
-      version,
-      description,
-      tags,
-      instructions
-    };
-    
+    const skillData = { name, category: finalCategory, language: finalLanguage, agents, ides, version, description, tags, instructions };
     const mdContent = exportSkillAsMarkdown(skillData);
-    
     const blob = new Blob([mdContent], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -135,26 +158,22 @@ export default function EditSkill() {
   };
 
   const handleSave = () => {
-    if (!name.trim()) {
-      alert("Please enter a skill name");
-      return;
-    }
-
+    if (!name.trim()) { alert("Please enter a skill name"); return; }
     const finalCategory = category === "new" ? newCategory : category;
     const finalLanguage = language === "new" ? newLanguage : language;
-
     const updatedSkill: Skill = {
       ...targetSkill,
       name,
       category: finalCategory || "Uncategorized",
       language: finalLanguage || undefined,
+      agents,
+      ides,
       version,
       description,
       tags,
       instructions,
       updatedAt: now.toISOString()
     };
-
     updateSkill(updatedSkill);
     navigate("/skills/library");
   };
@@ -169,137 +188,136 @@ export default function EditSkill() {
                 <ArrowLeft className="w-3.5 h-3.5" /> Back to Library
               </Link>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-foreground">
-              Edit Skill
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-foreground">Edit Skill</h1>
           </div>
           <Button onClick={handleSave} className="w-full md:w-auto">
-            <Save className="w-4 h-4 mr-2" />
-            Save Changes
+            <Save className="w-4 h-4 mr-2" /> Save Changes
           </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Left Column: Basic Info */}
-          <div className="lg:col-span-1 space-y-6 bg-white dark:bg-card border border-border rounded-xl shadow-sm p-6 h-fit">
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold flex items-center gap-2 border-b border-border pb-2">
-                Basic Information
-              </h2>
+          <div className="lg:col-span-1 space-y-5 bg-white dark:bg-card border border-border rounded-xl shadow-sm p-6 h-fit">
+            <h2 className="text-lg font-semibold flex items-center gap-2 border-b border-border pb-2">Basic Information</h2>
 
-              <div className="space-y-2">
-                <Label htmlFor="skill-name">Skill Name <span className="text-red-500">*</span></Label>
-                <Input 
-                  id="skill-name" 
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  autoComplete="off"
-                />
-              </div>
+            {/* Skill Name */}
+            <div className="space-y-2">
+              <Label htmlFor="skill-name">Skill Name <span className="text-red-500">*</span></Label>
+              <Input id="skill-name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger id="category">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {existingCategories.map(cat => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                    ))}
-                    <SelectItem value="new">+ Create New Category</SelectItem>
-                  </SelectContent>
-                </Select>
-                {category === "new" && (
-                  <Input 
-                    placeholder="Enter new category name..." 
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    className="mt-2"
-                  />
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="language">Language</Label>
-                <Select value={language} onValueChange={setLanguage}>
-                  <SelectTrigger id="language">
-                    <SelectValue placeholder="Select a language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {existingLanguages.map(lang => (
-                      <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                    ))}
-                    <SelectItem value="new">+ Create New Language</SelectItem>
-                  </SelectContent>
-                </Select>
-                {language === "new" && (
-                  <Input 
-                    placeholder="Enter new language name..." 
-                    value={newLanguage}
-                    onChange={(e) => setNewLanguage(e.target.value)}
-                    className="mt-2"
-                  />
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="version">Version</Label>
-                <Input 
-                  id="version" 
-                  value={version}
-                  onChange={(e) => setVersion(e.target.value)}
-                  className="font-mono"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description (Short)</Label>
-                <Textarea 
-                  id="description" 
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="resize-none h-20"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tags">Tags (Press Enter to add)</Label>
-                <Input 
-                  id="tags" 
-                  placeholder="e.g. development, review..." 
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={handleAddTag}
-                />
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {tags.map(tag => (
-                    <Badge 
-                      key={tag} 
-                      variant="secondary"
-                      className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                      onClick={() => handleRemoveTag(tag)}
-                      title="Click to remove"
-                    >
-                      {tag} &times;
-                    </Badge>
+            {/* Category */}
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {existingCategories.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
-                </div>
+                  <SelectItem value="new">+ Create New Category</SelectItem>
+                </SelectContent>
+              </Select>
+              {category === "new" && (
+                <Input placeholder="Enter new category name..." value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="mt-2" />
+              )}
+            </div>
+
+            {/* Language */}
+            <div className="space-y-2">
+              <Label htmlFor="language">Language</Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger id="language">
+                  <SelectValue placeholder="Select a language" />
+                </SelectTrigger>
+                <SelectContent>
+                  {existingLanguages.map(lang => (
+                    <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                  ))}
+                  <SelectItem value="new">+ Create New Language</SelectItem>
+                </SelectContent>
+              </Select>
+              {language === "new" && (
+                <Input placeholder="Enter new language name..." value={newLanguage} onChange={(e) => setNewLanguage(e.target.value)} className="mt-2" />
+              )}
+            </div>
+
+            {/* Coding Agents */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5"><Bot className="w-3.5 h-3.5" /> Coding Agents</Label>
+              <MultiSelect
+                options={CODING_AGENTS}
+                value={agents}
+                onChange={setAgents}
+                placeholder="Select coding agents..."
+              />
+              {agents.length === 0 && <p className="text-xs text-muted-foreground">None selected — skill works with any agent.</p>}
+            </div>
+
+            {/* IDEs */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5"><Monitor className="w-3.5 h-3.5" /> Compatible IDEs</Label>
+              <MultiSelect
+                options={IDES}
+                value={ides}
+                onChange={setIdes}
+                placeholder="Select compatible IDEs..."
+              />
+              {ides.length === 0 && <p className="text-xs text-muted-foreground">None selected — skill works in any IDE.</p>}
+            </div>
+
+            {/* Version */}
+            <div className="space-y-2">
+              <Label htmlFor="version">Version</Label>
+              <Input id="version" value={version} onChange={(e) => setVersion(e.target.value)} className="font-mono" />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description">Description (Short)</Label>
+              <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} className="resize-none h-20" />
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags (Press Enter to add)</Label>
+              <Input
+                id="tags"
+                placeholder="e.g. development, review..."
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleAddTag}
+              />
+              <div className="flex flex-wrap gap-2 pt-2">
+                {tags.map(tag => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                    onClick={() => handleRemoveTag(tag)}
+                    title="Click to remove"
+                  >
+                    {tag} &times;
+                  </Badge>
+                ))}
               </div>
             </div>
 
+            {/* Metadata */}
             <div className="space-y-4 pt-4 border-t border-border">
               <h2 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
                 <Clock className="w-4 h-4" /> System Metadata
               </h2>
               <div className="text-sm text-muted-foreground space-y-1">
                 <div className="flex justify-between items-center">
-                  <span className="flex items-center gap-1.5"><CalendarDays className="w-3 h-3"/> Created Date</span>
+                  <span className="flex items-center gap-1.5"><CalendarDays className="w-3 h-3" /> Created Date</span>
                   <span>{createdAt}</span>
                 </div>
                 <div className="flex justify-between items-center text-primary font-medium">
-                  <span className="flex items-center gap-1.5"><CalendarDays className="w-3 h-3"/> Will Update To</span>
+                  <span className="flex items-center gap-1.5"><CalendarDays className="w-3 h-3" /> Will Update To</span>
                   <span>{formattedUpdatedDate}</span>
                 </div>
               </div>
@@ -308,38 +326,20 @@ export default function EditSkill() {
 
           {/* Right Column: Markdown Editor */}
           <div className="lg:col-span-2 bg-white dark:bg-card border border-border rounded-xl shadow-sm flex flex-col overflow-hidden">
-            
-            {/* Editor Header */}
             <div className="bg-muted/30 border-b border-border px-4 py-3 xl:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <h2 className="text-base font-semibold">Skill Template Editor</h2>
-              
               <div className="flex items-center gap-2 self-end sm:self-auto">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleLoadTemplate}
-                  className="h-8 text-xs bg-white dark:bg-background"
-                >
-                  <FileSignature className="w-3.5 h-3.5 mr-1.5" />
-                  Load Sample Template
+                <Button variant="outline" size="sm" onClick={handleLoadTemplate} className="h-8 text-xs bg-white dark:bg-background">
+                  <FileSignature className="w-3.5 h-3.5 mr-1.5" /> Load Sample Template
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleDownload}
-                  className="h-8 text-xs bg-white dark:bg-background"
-                  title="Download as Markdown"
-                >
-                  <Download className="w-3.5 h-3.5 mr-1.5" />
-                  Download
+                <Button variant="outline" size="sm" onClick={handleDownload} className="h-8 text-xs bg-white dark:bg-background" title="Download as Markdown">
+                  <Download className="w-3.5 h-3.5 mr-1.5" /> Download
                 </Button>
               </div>
             </div>
-
-            {/* Editor Body */}
             <div className="p-4 xl:p-6 flex-1 flex flex-col">
               <Label htmlFor="instructions" className="sr-only">Markdown Instructions</Label>
-              <Textarea 
+              <Textarea
                 id="instructions"
                 value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
@@ -347,7 +347,6 @@ export default function EditSkill() {
                 spellCheck={false}
               />
             </div>
-            
           </div>
 
         </div>

@@ -7,7 +7,7 @@ const DEFAULT_USE_CASES: UseCase[] = [
     id: 'mock-1',
     title: "Automated Code Review",
     description: "Chain a stylistic linters skill with a deep-logic analysis skill to provide comprehensive feedback on pending Pull Requests instantly.",
-    pipelineId: "",
+    pipelineId: "default-pipeline-pr-review",
     icon: "Code2",
     color: "bg-blue-500/10",
     createdAt: Date.now(),
@@ -17,7 +17,7 @@ const DEFAULT_USE_CASES: UseCase[] = [
     id: 'mock-2',
     title: "Customer Support Triage",
     description: "Intelligently route incoming support tickets by combining sentiment analysis skills with technical categorization.",
-    pipelineId: "",
+    pipelineId: "default-pipeline-pr-review",
     icon: "MessageSquare",
     color: "bg-green-500/10",
     createdAt: Date.now(),
@@ -27,7 +27,7 @@ const DEFAULT_USE_CASES: UseCase[] = [
     id: 'mock-3',
     title: "Document Summarization",
     description: "Extract key entities from long-form PDFs and generate executive summaries formatted specifically for stakeholder emails.",
-    pipelineId: "",
+    pipelineId: "default-pipeline-full-audit",
     icon: "FileText",
     color: "bg-amber-500/10",
     createdAt: Date.now(),
@@ -37,7 +37,7 @@ const DEFAULT_USE_CASES: UseCase[] = [
     id: 'mock-4',
     title: "Complex Data Extraction",
     description: "Pull unstructured data from websites, clean the output via a pipeline, and structure it into strict JSON payloads for your database.",
-    pipelineId: "",
+    pipelineId: "default-pipeline-pr-review",
     icon: "Database",
     color: "bg-purple-500/10",
     createdAt: Date.now(),
@@ -47,7 +47,7 @@ const DEFAULT_USE_CASES: UseCase[] = [
     id: 'mock-5',
     title: "Technical Research Assistant",
     description: "Feed a topic to the pipeline to automatically search APIs, summarize papers, and generate a literature review.",
-    pipelineId: "",
+    pipelineId: "default-pipeline-full-audit",
     icon: "Search",
     color: "bg-rose-500/10",
     createdAt: Date.now(),
@@ -97,6 +97,14 @@ export const useUseCaseStore = create<UseCaseStore>()(
     }),
     {
       name: 'use-case-storage',
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        const existingIds = new Set(state.useCases.map(uc => uc.id));
+        const missing = DEFAULT_USE_CASES.filter(uc => !existingIds.has(uc.id));
+        if (missing.length > 0) {
+          state.useCases = [...missing, ...state.useCases];
+        }
+      }
     }
   )
 );
