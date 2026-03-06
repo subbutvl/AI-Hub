@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { WelcomeModal } from "../components/WelcomeModal";
 import { Layout } from "../components/Layout";
 import { Link } from "react-router-dom";
 import {
@@ -407,6 +408,7 @@ function SectionCard({ section }: { section: Section }) {
 
 export default function Help() {
   const [activeTab, setActiveTab] = useState<"guide" | "future">("guide");
+  const [showWelcome, setShowWelcome] = useState(false);
 
   return (
     <Layout>
@@ -450,6 +452,14 @@ export default function Help() {
           >
             Future Enhancements
           </button>
+        </div>
+
+        {/* Welcome Launch Button */}
+        <div className="flex justify-center mt-4">
+           <Button variant="outline" onClick={() => setShowWelcome(true)} className="gap-2">
+             <Rocket className="w-4 h-4 text-primary" />
+             View AI Hub Introduction
+           </Button>
         </div>
 
         {/* ── Feature Guide Tab ── */}
@@ -553,6 +563,8 @@ export default function Help() {
           </div>
         )}
       </div>
+
+      <WelcomeModal isOpen={showWelcome} onClose={() => setShowWelcome(false)} />
     </Layout>
   );
 }

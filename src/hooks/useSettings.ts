@@ -6,6 +6,7 @@ export interface AppSettings {
   enableWebHub: boolean;
   enableBackgroundQuerying: boolean;
   webHubLayout: 'grid' | 'table';
+  hasSeenWelcome: boolean;
 }
 
 const defaultSettings: AppSettings = {
@@ -14,6 +15,7 @@ const defaultSettings: AppSettings = {
   enableWebHub: true,
   enableBackgroundQuerying: false,
   webHubLayout: 'grid',
+  hasSeenWelcome: false,
 };
 
 export function useSettings() {

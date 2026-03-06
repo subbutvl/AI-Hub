@@ -1,10 +1,12 @@
-import { useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { useRepoStore } from '../hooks/useRepoStore';
 import { useWebHubStore } from '../hooks/useWebHubStore';
 import { useSkillStore } from '../hooks/useSkillStore';
 import { useUseCaseStore } from '../hooks/useUseCaseStore';
+import { useSettings } from '../hooks/useSettings';
+import { WelcomeModal } from '../components/WelcomeModal';
 import { 
   Github, Globe, Cpu, Lightbulb, 
   ChevronRight, ExternalLink, Clock, 
@@ -58,6 +60,19 @@ export default function Dashboard() {
   const { links } = useWebHubStore();
   const { skills } = useSkillStore();
   const { useCases } = useUseCaseStore();
+  const { settings, updateSettings } = useSettings();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    if (!settings.hasSeenWelcome) {
+      setShowWelcome(true);
+    }
+  }, [settings.hasSeenWelcome]);
+
+  const handleCloseWelcome = () => {
+    setShowWelcome(false);
+    updateSettings({ hasSeenWelcome: true });
+  };
 
   const randomSummary = useMemo(() => SUMMARIES[Math.floor(Math.random() * SUMMARIES.length)], []);
 
@@ -196,6 +211,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      <WelcomeModal isOpen={showWelcome} onClose={handleCloseWelcome} />
     </Layout>
   );
 }

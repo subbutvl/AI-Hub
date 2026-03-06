@@ -93,6 +93,12 @@ export function parseCsv<T>(csvText: string): T[] {
              } catch (e) {
                  // ignore, keep as string
              }
+        } else if (header.toLowerCase() === 'tags' || header.toLowerCase() === 'topics') {
+             if (typeof val === 'string' && val.trim() !== '' && !val.startsWith('[')) {
+                 val = val.split(/[,;]/).map((t: string) => t.trim()).filter(Boolean) as any;
+             } else if (!val) {
+                 val = [] as any;
+             }
         } else if (val === 'true') {
             val = true as any;
         } else if (val === 'false') {

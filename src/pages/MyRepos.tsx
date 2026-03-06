@@ -23,7 +23,13 @@ export default function MyRepos() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const sortedRepos = useMemo(() => {
-    return [...repos].sort((a, b) => {
+    // Sanitize any broken tags from localStorage
+    const safeRepos = repos.map(r => ({
+      ...r,
+      tags: Array.isArray(r.tags) ? r.tags : String(r.tags || "").split(/[,;]/).map(t => t.trim()).filter(Boolean)
+    }));
+
+    return [...safeRepos].sort((a, b) => {
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name);

@@ -2,11 +2,46 @@ import { Layout } from "../components/Layout";
 import { useSettings } from "../hooks/useSettings";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Settings as SettingsIcon, LayoutGrid, List } from "lucide-react";
+import { Settings as SettingsIcon, LayoutGrid, List, Database, Upload, ArrowRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { useRepoStore } from '../hooks/useRepoStore';
+import { useWebHubStore } from '../hooks/useWebHubStore';
+import { parseCsv } from '../utils/csvHelper';
+import { SavedRepo } from '../types';
+import { WebLink } from '../types/webHub';
+import { useState } from 'react';
+
+// Import raw CSV data
+import reposCsvData from '../data/my-dashboard-repos.csv?raw';
+import webHubCsvData from '../data/web-hub.csv?raw';
 
 export default function Settings() {
   const { settings, updateSettings } = useSettings();
+  const { importRepos } = useRepoStore();
+  const { importLinks } = useWebHubStore();
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  const handleLoadSampleData = () => {
+    try {
+      // Parse and load Repositories
+      const parsedRepos = parseCsv<SavedRepo>(reposCsvData);
+      if (parsedRepos && parsedRepos.length > 0) {
+        importRepos(parsedRepos);
+      }
+
+      // Parse and load Web Links
+      const parsedLinks = parseCsv<WebLink>(webHubCsvData);
+      if (parsedLinks && parsedLinks.length > 0) {
+        importLinks(parsedLinks);
+      }
+
+      setIsLoaded(true);
+      setTimeout(() => setIsLoaded(false), 3000);
+    } catch (error) {
+      console.error("Failed to load sample data:", error);
+    }
+  };
 
   return (
     <Layout>
@@ -132,6 +167,28 @@ export default function Settings() {
                 checked={settings.enableBackgroundQuerying}
                 onCheckedChange={(checked) => updateSettings({ enableBackgroundQuerying: checked })}
               />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold border-b border-border pb-2">Data Management</h2>
+            
+            <div className="flex items-start justify-between">
+              <div className="space-y-0.5 max-w-lg">
+                <Label className="text-base font-medium">Load Sample Data</Label>
+                <p className="text-sm text-muted-foreground">
+                  Populate your Repo Hub and Web Hub with pre-configured sample data (CSV format) to explore AI Hub's features quickly.
+                </p>
+              </div>
+              <Button 
+                variant="outline" 
+                className="gap-2 relative overflow-hidden group shrink-0" 
+                onClick={handleLoadSampleData}
+              >
+                <Upload className="w-4 h-4 group-hover:-translate-y-1 group-hover:opacity-0 transition-all absolute" />
+                <Database className="w-4 h-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all absolute" />
+                <span className="ml-6">{isLoaded ? "Data Loaded successfully!" : "Load Sample Data"}</span>
+              </Button>
             </div>
           </div>
 

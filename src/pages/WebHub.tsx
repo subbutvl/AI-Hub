@@ -469,7 +469,12 @@ export default function WebHub() {
   }, [search, filterType, filterCategory, sort]);
 
   const filtered = useMemo(() => {
-    let result = [...links];
+    // Sanitize any broken tags from localStorage
+    const safeLinks = links.map(l => ({
+      ...l,
+      tags: Array.isArray(l.tags) ? l.tags : String(l.tags || "").split(/[,;]/).map(t => t.trim()).filter(Boolean)
+    }));
+    let result = [...safeLinks];
 
     if (search.trim()) {
       const q = search.toLowerCase();
