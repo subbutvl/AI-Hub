@@ -3,6 +3,8 @@ import { Github, LayoutDashboard, Database, Users, Compass, BookOpen, AlertTrian
 import { ModeToggle } from "./ModeToggle";
 import { useState, useEffect, useRef } from "react";
 import { errorBus } from "../services/errorBus";
+import { useSettings } from "../hooks/useSettings";
+import { Settings as SettingsIcon } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,6 +17,7 @@ export function Layout({ children }: LayoutProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isSkillHubOpen, setIsSkillHubOpen] = useState(false);
   const skillHubDropdownRef = useRef<HTMLDivElement>(null);
+  const { settings } = useSettings();
 
   useEffect(() => {
     const unsubscribe = errorBus.subscribe((msg) => {
@@ -93,6 +96,8 @@ export function Layout({ children }: LayoutProps) {
                 My Repos
               </Link>
 
+              {/* Repo Hub Dropdown */}
+              {settings.enableRepoHub && (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsRepoHubOpen(!isRepoHubOpen)}
@@ -148,8 +153,10 @@ export function Layout({ children }: LayoutProps) {
                   </div>
                 )}
               </div>
+              )}
 
               {/* Skill Hub Dropdown */}
+              {settings.enableSkillHub && (
               <div className="relative" ref={skillHubDropdownRef}>
                 <button
                   onClick={() => setIsSkillHubOpen(!isSkillHubOpen)}
@@ -211,10 +218,18 @@ export function Layout({ children }: LayoutProps) {
                   </div>
                 )}
               </div>
+              )}
             </nav>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            <Link 
+              to="/settings"
+              className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-md hover:bg-secondary/50"
+              title="Settings"
+            >
+              <SettingsIcon className="w-5 h-5" />
+            </Link>
             <ModeToggle />
           </div>
         </div>

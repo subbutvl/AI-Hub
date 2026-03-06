@@ -13,6 +13,7 @@ interface FilterPanelProps {
   progressMessage?: string;
   uniqueLanguages: string[];
   uniqueCountries: string[];
+  cooldownRemaining?: number;
 }
 
 export function FilterPanel({
@@ -23,6 +24,7 @@ export function FilterPanel({
   progressMessage,
   uniqueLanguages,
   uniqueCountries,
+  cooldownRemaining,
 }: FilterPanelProps) {
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,11 +79,14 @@ export function FilterPanel({
             variant="default" 
             size="sm" 
             onClick={onRefresh} 
-            disabled={isRefreshing}
-            className="flex-1 md:flex-none"
+            disabled={isRefreshing || (cooldownRemaining ?? 0) > 0}
+            className="flex-1 md:flex-none w-[140px]"
           >
             <RotateCw className={`w-4 h-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
-            {isRefreshing ? "Updating..." : "Refresh Data"}
+            {(cooldownRemaining ?? 0) > 0 
+              ? `Wait ${Math.floor((cooldownRemaining ?? 0) / 60)}:${((cooldownRemaining ?? 0) % 60).toString().padStart(2, '0')}`
+              : isRefreshing ? "Updating..." : "Refresh Data"
+            }
           </Button>
         </div>
       </div>

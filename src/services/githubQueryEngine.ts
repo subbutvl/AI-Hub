@@ -59,6 +59,21 @@ export class GitHubQueryEngine {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  public getCooldownRemaining(): number {
+    const cooldownStr = localStorage.getItem("ai_repositories_cooldown_until");
+    if (cooldownStr) {
+      const cooldownUntil = parseInt(cooldownStr, 10);
+      const ms = cooldownUntil - Date.now();
+      return ms > 0 ? Math.ceil(ms / 1000) : 0;
+    }
+    return 0;
+  }
+
+  private setCooldown() {
+    const FIFTEEN_MINS = 15 * 60 * 1000;
+    localStorage.setItem("ai_repositories_cooldown_until", (Date.now() + FIFTEEN_MINS).toString());
+  }
+
   private async checkRateLimit(headers: Headers) {
     if (this.isStopped) return;
 
@@ -94,6 +109,10 @@ export class GitHubQueryEngine {
       throw new Error("Query engine is stopped.");
     }
 
+    if (this.getCooldownRemaining() > 0) {
+      throw new Error("GitHub fetch error occurred. Please wait for the cooldown timer.");
+    }
+
     await this.delay(1500); // Base delay between requests
 
     const headers: HeadersInit = {
@@ -109,11 +128,15 @@ export class GitHubQueryEngine {
       await this.checkRateLimit(response.headers);
 
       if (!response.ok) {
+        this.isStopped = true;
+        this.setCooldown();
+        
         if (response.status === 403 || response.status === 429) {
-          this.isStopped = true;
-          errorBus.emit("GitHub API rate limit exceeded. Querying stopped to prevent abuse.");
+          errorBus.emit("GitHub API rate limit exceeded. Querying stopped for 15 minutes.");
           throw new Error("Rate limit exceeded");
         }
+        
+        errorBus.emit(`GitHub API error: ${response.status} ${response.statusText}. Querying stopped for 15 minutes.`);
         throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
       }
 
@@ -192,7 +215,7 @@ export class GitHubQueryEngine {
 
   private async searchByStarRanges(baseQuery: string) {
     // Check total count first
-    const checkUrl = `https://api.github.com/search/repositories?q=${baseQuery}&per_page=1`;
+    const checkUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(baseQuery)}&per_page=1`;
     const checkData = await this.fetchWithAuth(checkUrl);
     
     if (checkData.total_count <= 1000) {
@@ -216,13 +239,46 @@ export class GitHubQueryEngine {
     }
   }
 
+  private enforceManualRateLimit() {
+    const RATE_LIMIT_KEY = "ai_repositories_refresh_history";
+    const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+    const MAX_REFRESHES = 3;
+
+    try {
+      const historyJson = localStorage.getItem(RATE_LIMIT_KEY);
+      let history: number[] = historyJson ? JSON.parse(historyJson) : [];
+      
+      const now = Date.now();
+      // Keep only timestamps within the last 2 hours
+      history = history.filter(timestamp => now - timestamp < TWO_HOURS_MS);
+      
+      if (history.length >= MAX_REFRESHES) {
+        throw new Error("You have reached the limit of 3 refreshes per 2 hours. Please try again later. Displaying cached data if available.");
+      }
+
+      // Add current refresh
+      history.push(now);
+      localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(history));
+
+    } catch(e) {
+      if (e instanceof Error && e.message.includes("limit of 3 refreshes")) {
+        throw e;
+      }
+      console.warn("Error processing manual rate limit", e);
+    }
+  }
+
   public async run(): Promise<AIRepository[]> {
     // Try to load from cache first
     const cached = this.loadFromCache();
-    if (cached) {
+    if (cached && !this.isStopped) {
       this.onProgress?.("Loaded from cache", cached.length);
       return cached;
     }
+
+    // Only apply the 3-refreshes/2hr limit when actually running a fresh fetch 
+    // (meaning the cache expired or was cleared via manual refresh)
+    this.enforceManualRateLimit();
 
     this.collectedRepos.clear();
     
@@ -237,18 +293,14 @@ export class GitHubQueryEngine {
       "topic:deep-learning"
     ];
 
-    // Group topics to reduce queries (OR logic)
-    // GitHub search query length is limited, so we group by 2-3 topics
-    const groups = [];
-    for (let i = 0; i < topics.length; i += 2) {
-      groups.push(topics.slice(i, i + 2).join(" OR "));
+    // GitHub Search API does not support OR between qualifiers (like 'topic:') 
+    // Therefore, we must query each topic individually.
+    for (const topicQuery of topics) {
+      if (this.collectedRepos.size >= 1000) break;
+      await this.searchByStarRanges(topicQuery);
     }
 
-    for (const groupQuery of groups) {
-      await this.searchByStarRanges(groupQuery);
-    }
-
-    const results = Array.from(this.collectedRepos.values());
+    const results = Array.from(this.collectedRepos.values()).slice(0, 1000);
     this.saveToCache(results);
     
     return results;

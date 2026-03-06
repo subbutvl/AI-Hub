@@ -8,6 +8,8 @@ import { Layout } from "../components/Layout";
 import { CsvControls } from "../components/CsvControls";
 import { HelpDrawer } from "../components/HelpDrawer";
 import { HelpButton } from "../components/HelpButton";
+import { AlertTriangle } from "lucide-react";
+import { useSettings } from "../hooks/useSettings";
 
 export default function AIIndex() {
   const [repos, setRepos] = useState<AIRepository[]>([]);
@@ -22,6 +24,15 @@ export default function AIIndex() {
     minStars: 0,
     country: "",
   });
+  const { settings } = useSettings();
+  const [cooldownRemaining, setCooldownRemaining] = useState(gitHubQueryEngine.getCooldownRemaining());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCooldownRemaining(gitHubQueryEngine.getCooldownRemaining());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const loadData = async (forceRefresh = false) => {
     setRefreshing(true);
@@ -41,12 +52,14 @@ export default function AIIndex() {
       setRepos(data);
       setLoading(false);
 
-      // Fetch locations in background
-      fetchLocationsForRepos(data, (repoId, location) => {
-        setRepos(prev => prev.map(r => 
-          r.id === repoId ? { ...r, ...location } : r
-        ));
-      });
+      // Fetch locations in background only if enabled
+      if (settings.enableBackgroundQuerying) {
+        fetchLocationsForRepos(data, (repoId, location) => {
+          setRepos(prev => prev.map(r => 
+            r.id === repoId ? { ...r, ...location } : r
+          ));
+        });
+      }
       
     } catch (error) {
       console.error("Failed to load AI repos", error);
@@ -123,6 +136,18 @@ export default function AIIndex() {
           </div>
         </div>
 
+        {cooldownRemaining > 0 && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-xl flex items-center justify-between">
+            <div className="flex items-center gap-3 text-red-800 dark:text-red-200 text-sm font-medium">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+              <p>
+                GitHub API fetching is currently disabled due to an error or rate limit. 
+                Please wait <b>{Math.floor(cooldownRemaining / 60)}:{(cooldownRemaining % 60).toString().padStart(2, '0')}</b> minutes before querying again.
+              </p>
+            </div>
+          </div>
+        )}
+
         <FilterPanel
           filter={filter}
           setFilter={setFilter}
@@ -131,6 +156,7 @@ export default function AIIndex() {
           progressMessage={progressMessage}
           uniqueLanguages={uniqueLanguages}
           uniqueCountries={uniqueCountries}
+          cooldownRemaining={cooldownRemaining}
         />
 
         {loading ? (

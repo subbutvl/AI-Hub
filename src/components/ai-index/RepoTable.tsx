@@ -132,7 +132,7 @@ export function RepoTable({ data }: RepoTableProps) {
     },
     initialState: {
       pagination: {
-        pageSize: 20,
+        pageSize: 100,
       },
     },
   });

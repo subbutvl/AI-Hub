@@ -6,6 +6,7 @@ import AIIndex from './pages/AIIndex';
 import DevIndex from './pages/DevIndex';
 import AIExplorer from './pages/AIExplorer';
 import AwesomeAI from './pages/AwesomeAI';
+import Settings from './pages/Settings';
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/awesome-ai" element={<AwesomeAI />} />
         <Route path="/ai-explorer" element={<AIExplorer />} />
         <Route path="/repo/:owner/:repo" element={<RepoDetail />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
   );
