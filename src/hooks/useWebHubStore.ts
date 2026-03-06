@@ -15,7 +15,35 @@ interface WebHubStore {
 export const useWebHubStore = create<WebHubStore>()(
   persist(
     (set, get) => ({
-      links: [],
+      links: [
+        {
+          id: 'def-1',
+          url: 'https://www.youtube.com/watch?v=aircAruvnKk',
+          name: 'OpenAI DevDay Opening Keynote',
+          type: 'youtube-video',
+          category: 'AI News',
+          tags: ['openai', 'keynote', 'devday'],
+          addedAt: new Date().toISOString(),
+        },
+        {
+          id: 'def-2',
+          url: 'https://github.com/microsoft/vscode',
+          name: 'Microsoft VS Code',
+          type: 'github-repo',
+          category: 'IDE',
+          tags: ['editor', 'microsoft', 'typescript'],
+          addedAt: new Date().toISOString(),
+        },
+        {
+          id: 'def-3',
+          url: 'https://www.anthropic.com/news/claude-3-5-sonnet',
+          name: 'Claude 3.5 Sonnet Announcement',
+          type: 'webpage',
+          category: 'AI Models',
+          tags: ['anthropic', 'claude', 'llm'],
+          addedAt: new Date().toISOString(),
+        }
+      ],
 
       addLink: (link) => {
         const existing = get().links;
