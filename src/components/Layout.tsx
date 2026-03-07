@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { errorBus } from "../services/errorBus";
 import { useSettings } from "../hooks/useSettings";
 import { Settings as SettingsIcon } from "lucide-react";
+import { open as tauriOpen } from "@tauri-apps/plugin-shell";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -40,6 +41,27 @@ export function Layout({ children }: LayoutProps) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+  }, []);
+
+  // Intercept global link clicks to open in system browser when running in Tauri
+  useEffect(() => {
+    // @ts-ignore
+    const isTauri = !!window.__TAURI_INTERNALS__;
+    if (!isTauri) return;
+
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest("a");
+      if (target && target.href && target.href.startsWith("http")) {
+        // Only intercept if the link is external (not the local host app)
+        if (target.host !== window.location.host) {
+          e.preventDefault();
+          tauriOpen(target.href).catch(console.error);
+        }
+      }
+    };
+
+    document.addEventListener("click", handleGlobalClick);
+    return () => document.removeEventListener("click", handleGlobalClick);
   }, []);
 
   return (
