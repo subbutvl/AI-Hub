@@ -68,7 +68,7 @@ export function Layout({ children }: LayoutProps) {
       )}
 
       {/* Header */}
-      <header className="bg-white dark:bg-card border-b border-gray-200 dark:border-border sticky top-0 z-10">
+      <header className="bg-white dark:bg-card border-b border-gray-200 dark:border-border sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2 font-bold text-xl tracking-tight text-gray-900 dark:text-foreground">
