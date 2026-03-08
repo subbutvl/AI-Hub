@@ -116,6 +116,34 @@ export default function Settings() {
                 onCheckedChange={(checked) => updateSettings({ enableStackBuilder: checked })}
               />
             </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="enable-rss-feeds" className="text-base font-medium">Enable RSS Feeds</Label>
+                <p className="text-sm text-muted-foreground">
+                  Displays the RSS Feeds reader in the Web Hub menu.
+                </p>
+              </div>
+              <Switch 
+                id="enable-rss-feeds" 
+                checked={settings.enableRssFeeds !== false}
+                onCheckedChange={(checked) => updateSettings({ enableRssFeeds: checked })}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="enable-podcasts" className="text-base font-medium">Enable Podcasts</Label>
+                <p className="text-sm text-muted-foreground">
+                  Displays the Podcasts manager in the Web Hub menu.
+                </p>
+              </div>
+              <Switch 
+                id="enable-podcasts" 
+                checked={settings.enablePodcasts !== false}
+                onCheckedChange={(checked) => updateSettings({ enablePodcasts: checked })}
+              />
+            </div>
           </div>
 
           {/* Web Hub Features */}

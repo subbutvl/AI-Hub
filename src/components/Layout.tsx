@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Github, LayoutDashboard, Database, Users, Compass, BookOpen, AlertTriangle, X, ChevronDown, Folder, Wrench, Edit, Library, TestTube, GitMerge, Lightbulb, Cpu, HelpCircle, Globe } from "lucide-react";
+import { Github, LayoutDashboard, Database, Users, Compass, BookOpen, AlertTriangle, X, ChevronDown, Folder, Wrench, Edit, Library, TestTube, GitMerge, Lightbulb, Cpu, HelpCircle, Globe, Star, Rss, Headphones } from "lucide-react";
 import { ModeToggle } from "./ModeToggle";
 import { useState, useEffect, useRef } from "react";
 import { errorBus } from "../services/errorBus";
@@ -17,6 +17,8 @@ export function Layout({ children }: LayoutProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isSkillHubOpen, setIsSkillHubOpen] = useState(false);
   const skillHubDropdownRef = useRef<HTMLDivElement>(null);
+  const [isWebHubOpen, setIsWebHubOpen] = useState(false);
+  const webHubDropdownRef = useRef<HTMLDivElement>(null);
   const { settings } = useSettings();
 
   useEffect(() => {
@@ -33,6 +35,9 @@ export function Layout({ children }: LayoutProps) {
       }
       if (skillHubDropdownRef.current && !skillHubDropdownRef.current.contains(event.target as Node)) {
         setIsSkillHubOpen(false);
+      }
+      if (webHubDropdownRef.current && !webHubDropdownRef.current.contains(event.target as Node)) {
+        setIsWebHubOpen(false);
       }
     };
 
@@ -52,7 +57,7 @@ export function Layout({ children }: LayoutProps) {
               <AlertTriangle className="w-5 h-5 flex-shrink-0" />
               <p className="text-sm font-medium">{errorMessage}</p>
             </div>
-            <button 
+            <button
               onClick={() => setErrorMessage(null)}
               className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-200 transition-colors"
             >
@@ -70,195 +75,225 @@ export function Layout({ children }: LayoutProps) {
               <Github className="w-6 h-6" />
               <span>AI Hub</span>
             </div>
-            
+
             <nav className="hidden md:flex items-center gap-1">
-              <Link 
-                to="/" 
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                  location.pathname === "/" 
-                    ? "bg-secondary text-secondary-foreground" 
+              <Link
+                to="/"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${location.pathname === "/"
+                    ? "bg-secondary text-secondary-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                }`}
+                  }`}
               >
                 <LayoutDashboard className="w-4 h-4" />
                 Dashboard
               </Link>
-              
-              <Link 
-                to="/my-repos" 
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                  location.pathname === "/my-repos" 
-                    ? "bg-secondary text-secondary-foreground" 
+
+              <Link
+                to="/my-repos"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${location.pathname === "/my-repos"
+                    ? "bg-secondary text-secondary-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                }`}
+                  }`}
               >
                 <Github className="w-4 h-4" />
                 My Repos
               </Link>
 
+              {/* Web Hub Dropdown */}
               {settings.enableWebHub && (
-                <Link
-                  to="/web-hub"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                    location.pathname === "/web-hub"
-                      ? "bg-secondary text-secondary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                  }`}
-                >
-                  <Globe className="w-4 h-4" />
-                  Web Hub
-                </Link>
+                <div className="relative" ref={webHubDropdownRef}>
+                  <button
+                    onClick={() => setIsWebHubOpen(!isWebHubOpen)}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${isWebHubOpen || location.pathname.startsWith("/web-hub")
+                        ? "bg-secondary text-secondary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                      }`}
+                  >
+                    <Globe className="w-4 h-4" />
+                    Web Hub
+                    <ChevronDown className={`w-4 h-4 transition-transform ${isWebHubOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {isWebHubOpen && (
+                    <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-popover border border-border shadow-md rounded-md py-1 z-50 flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                      <Link
+                        to="/web-hub/resources"
+                        className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${(location.pathname === "/web-hub" || location.pathname === "/web-hub/resources") ? "bg-accent/50 text-accent-foreground" : ""
+                          }`}
+                        onClick={() => setIsWebHubOpen(false)}
+                      >
+                        <Globe className="w-4 h-4" /> Resources
+                      </Link>
+                      <Link
+                        to="/web-hub/featured"
+                        className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${location.pathname === "/web-hub/featured" ? "bg-accent/50 text-accent-foreground" : ""
+                          }`}
+                        onClick={() => setIsWebHubOpen(false)}
+                      >
+                        <Star className="w-4 h-4" /> Featured
+                      </Link>
+                      {settings.enableRssFeeds !== false && (
+                        <Link
+                          to="/web-hub/rss"
+                          className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${location.pathname === "/web-hub/rss" ? "bg-accent/50 text-accent-foreground" : ""
+                            }`}
+                          onClick={() => setIsWebHubOpen(false)}
+                        >
+                          <Rss className="w-4 h-4" /> RSS Feeds
+                        </Link>
+                      )}
+                      {settings.enablePodcasts !== false && (
+                        <Link
+                          to="/web-hub/podcasts"
+                          className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${location.pathname === "/web-hub/podcasts" ? "bg-accent/50 text-accent-foreground" : ""
+                            }`}
+                          onClick={() => setIsWebHubOpen(false)}
+                        >
+                          <Headphones className="w-4 h-4" /> Podcasts
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+
+              {/* Repo Hub Dropdown */}
+              {settings.enableRepoHub && (
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIsRepoHubOpen(!isRepoHubOpen)}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${isRepoHubOpen || ["/ai-index", "/dev-index", "/awesome-ai", "/ai-explorer"].includes(location.pathname)
+                        ? "bg-secondary text-secondary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                      }`}
+                  >
+                    <Folder className="w-4 h-4" />
+                    Repo Hub
+                    <ChevronDown className={`w-4 h-4 transition-transform ${isRepoHubOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {isRepoHubOpen && (
+                    <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-popover border border-border shadow-md rounded-md py-1 z-50 flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                      <Link
+                        to="/ai-index"
+                        className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${location.pathname === "/ai-index" ? "bg-accent/50 text-accent-foreground" : ""
+                          }`}
+                        onClick={() => setIsRepoHubOpen(false)}
+                      >
+                        <Database className="w-4 h-4" /> AI Index
+                      </Link>
+                      <Link
+                        to="/dev-index"
+                        className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${location.pathname === "/dev-index" ? "bg-accent/50 text-accent-foreground" : ""
+                          }`}
+                        onClick={() => setIsRepoHubOpen(false)}
+                      >
+                        <Users className="w-4 h-4" /> Dev Index
+                      </Link>
+                      <Link
+                        to="/awesome-ai"
+                        className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${location.pathname === "/awesome-ai" ? "bg-accent/50 text-accent-foreground" : ""
+                          }`}
+                        onClick={() => setIsRepoHubOpen(false)}
+                      >
+                        <BookOpen className="w-4 h-4" /> Awesome AI
+                      </Link>
+                      <Link
+                        to="/ai-explorer"
+                        className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${location.pathname === "/ai-explorer" ? "bg-accent/50 text-accent-foreground" : ""
+                          }`}
+                        onClick={() => setIsRepoHubOpen(false)}
+                      >
+                        <Compass className="w-4 h-4" /> AI Explorer
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Skill Hub Dropdown */}
+              {settings.enableSkillHub && (
+                <div className="relative" ref={skillHubDropdownRef}>
+                  <button
+                    onClick={() => setIsSkillHubOpen(!isSkillHubOpen)}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${isSkillHubOpen
+                        ? "bg-secondary text-secondary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                      }`}
+                  >
+                    <Cpu className="w-4 h-4" />
+                    Skill Hub
+                    <ChevronDown className={`w-4 h-4 transition-transform ${isSkillHubOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {isSkillHubOpen && (
+                    <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-popover border border-border shadow-md rounded-md py-1 z-50 flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                      <Link
+                        to="/skills/create"
+                        className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${location.pathname === "/skills/create" ? "bg-accent/50 text-accent-foreground" : ""
+                          }`}
+                        onClick={() => setIsSkillHubOpen(false)}
+                      >
+                        <Wrench className="w-4 h-4" /> Create Skill
+                      </Link>
+                      <Link
+                        to="/skills/library"
+                        className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${location.pathname === "/skills/library" ? "bg-accent/50 text-accent-foreground" : ""
+                          }`}
+                        onClick={() => setIsSkillHubOpen(false)}
+                      >
+                        <Library className="w-4 h-4" /> Skill Library
+                      </Link>
+                      <Link
+                        to="/skills/test"
+                        className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${location.pathname === "/skills/test" ? "bg-accent/50 text-accent-foreground" : ""
+                          }`}
+                        onClick={() => setIsSkillHubOpen(false)}
+                      >
+                        <TestTube className="w-4 h-4" /> Test Skill
+                      </Link>
+                      <Link
+                        to="/skills/pipeline"
+                        className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${location.pathname === "/skills/pipeline" ? "bg-accent/50 text-accent-foreground" : ""
+                          }`}
+                        onClick={() => setIsSkillHubOpen(false)}
+                      >
+                        <GitMerge className="w-4 h-4" /> Pipeline Builder
+                      </Link>
+                      <Link
+                        to="/skills/use-cases"
+                        className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${location.pathname === "/skills/use-cases" ? "bg-accent/50 text-accent-foreground" : ""
+                          }`}
+                        onClick={() => setIsSkillHubOpen(false)}
+                      >
+                        <Lightbulb className="w-4 h-4" /> Use Cases
+                      </Link>
+                    </div>
+                  )}
+                </div>
               )}
 
               {settings.enableStackBuilder && (
                 <Link
                   to="/angular-builder"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                    location.pathname === "/angular-builder"
-                      ? "bg-[#dd0031]/10 text-[#dd0031]"
-                      : "text-muted-foreground hover:text-[#dd0031] hover:bg-[#dd0031]/5"
-                  }`}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${location.pathname === "/angular-builder"
+                      ? "bg-[#dd0031] text-white"
+                      : "text-[#dd0031] bg-[#dd0031]/10 hover:bg-[#dd0031] hover:text-white"
+                    }`}
                 >
                   <Wrench className="w-4 h-4" />
                   ng Stack Builder
                 </Link>
               )}
-
-              {/* Repo Hub Dropdown */}
-              {settings.enableRepoHub && (
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsRepoHubOpen(!isRepoHubOpen)}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                    isRepoHubOpen || ["/ai-index", "/dev-index", "/awesome-ai", "/ai-explorer"].includes(location.pathname)
-                      ? "bg-secondary text-secondary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                  }`}
-                >
-                  <Folder className="w-4 h-4" />
-                  Repo Hub
-                  <ChevronDown className={`w-4 h-4 transition-transform ${isRepoHubOpen ? "rotate-180" : ""}`} />
-                </button>
-
-                {isRepoHubOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-popover border border-border shadow-md rounded-md py-1 z-50 flex flex-col animate-in fade-in zoom-in-95 duration-100">
-                    <Link 
-                      to="/ai-index" 
-                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
-                        location.pathname === "/ai-index" ? "bg-accent/50 text-accent-foreground" : ""
-                      }`}
-                      onClick={() => setIsRepoHubOpen(false)}
-                    >
-                      <Database className="w-4 h-4" /> AI Index
-                    </Link>
-                    <Link 
-                      to="/dev-index" 
-                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
-                        location.pathname === "/dev-index" ? "bg-accent/50 text-accent-foreground" : ""
-                      }`}
-                      onClick={() => setIsRepoHubOpen(false)}
-                    >
-                      <Users className="w-4 h-4" /> Dev Index
-                    </Link>
-                    <Link 
-                      to="/awesome-ai" 
-                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
-                        location.pathname === "/awesome-ai" ? "bg-accent/50 text-accent-foreground" : ""
-                      }`}
-                      onClick={() => setIsRepoHubOpen(false)}
-                    >
-                      <BookOpen className="w-4 h-4" /> Awesome AI
-                    </Link>
-                    <Link 
-                      to="/ai-explorer" 
-                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
-                        location.pathname === "/ai-explorer" ? "bg-accent/50 text-accent-foreground" : ""
-                      }`}
-                      onClick={() => setIsRepoHubOpen(false)}
-                    >
-                      <Compass className="w-4 h-4" /> AI Explorer
-                    </Link>
-                  </div>
-                )}
-              </div>
-              )}
-
-              {/* Skill Hub Dropdown */}
-              {settings.enableSkillHub && (
-              <div className="relative" ref={skillHubDropdownRef}>
-                <button
-                  onClick={() => setIsSkillHubOpen(!isSkillHubOpen)}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                    isSkillHubOpen
-                      ? "bg-secondary text-secondary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                  }`}
-                >
-                  <Cpu className="w-4 h-4" />
-                  Skill Hub
-                  <ChevronDown className={`w-4 h-4 transition-transform ${isSkillHubOpen ? "rotate-180" : ""}`} />
-                </button>
-
-                {isSkillHubOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-popover border border-border shadow-md rounded-md py-1 z-50 flex flex-col animate-in fade-in zoom-in-95 duration-100">
-                    <Link 
-                      to="/skills/create" 
-                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
-                        location.pathname === "/skills/create" ? "bg-accent/50 text-accent-foreground" : ""
-                      }`}
-                      onClick={() => setIsSkillHubOpen(false)}
-                    >
-                      <Wrench className="w-4 h-4" /> Create Skill
-                    </Link>
-                    <Link 
-                      to="/skills/library" 
-                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
-                        location.pathname === "/skills/library" ? "bg-accent/50 text-accent-foreground" : ""
-                      }`}
-                      onClick={() => setIsSkillHubOpen(false)}
-                    >
-                      <Library className="w-4 h-4" /> Skill Library
-                    </Link>
-                    <Link 
-                      to="/skills/test" 
-                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
-                        location.pathname === "/skills/test" ? "bg-accent/50 text-accent-foreground" : ""
-                      }`}
-                      onClick={() => setIsSkillHubOpen(false)}
-                    >
-                      <TestTube className="w-4 h-4" /> Test Skill
-                    </Link>
-                    <Link 
-                      to="/skills/pipeline" 
-                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
-                        location.pathname === "/skills/pipeline" ? "bg-accent/50 text-accent-foreground" : ""
-                      }`}
-                      onClick={() => setIsSkillHubOpen(false)}
-                    >
-                      <GitMerge className="w-4 h-4" /> Pipeline Builder
-                    </Link>
-                    <Link 
-                      to="/skills/use-cases" 
-                      className={`px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 ${
-                        location.pathname === "/skills/use-cases" ? "bg-accent/50 text-accent-foreground" : ""
-                      }`}
-                      onClick={() => setIsSkillHubOpen(false)}
-                    >
-                      <Lightbulb className="w-4 h-4" /> Use Cases
-                    </Link>
-                  </div>
-                )}
-              </div>
-              )}
             </nav>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center">
             <Link
               to="/help"
-              className={`text-muted-foreground hover:text-foreground transition-colors p-2 rounded-md hover:bg-secondary/50 ${
-                location.pathname === "/help" ? "bg-secondary text-secondary-foreground" : ""
-              }`}
+              className={`text-muted-foreground hover:text-foreground transition-colors p-2 rounded-md hover:bg-secondary/50 ${location.pathname === "/help" ? "bg-secondary text-secondary-foreground" : ""
+                }`}
               title="Help & Documentation"
             >
               <HelpCircle className="w-5 h-5" />

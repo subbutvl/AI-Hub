@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import {
   BookOpen, Library, Wrench, TestTube, GitMerge, Lightbulb,
   ChevronDown, ChevronRight, Rocket, CheckCircle2, Zap,
-  Bot, Monitor, FileText, Star, ArrowRight, Shield, Info, Globe, Users
+  Bot, Monitor, FileText, Star, ArrowRight, Shield, Info, Globe, Users, Headphones, Rss
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -196,6 +196,50 @@ const SECTIONS: Section[] = [
     tips: [
       "YouTube Shorts, Playlists, and Channels have distinct color-coded icons to help you scan your library faster.",
       "Hover over any link card to reveal quick-actions like Edit, Delete, and Open Link.",
+    ],
+  },
+  {
+    id: "rss-feeds",
+    icon: <Rss className="w-5 h-5" />,
+    title: "RSS Feeds",
+    color: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-800",
+    badge: "Web Hub",
+    what: "An integrated RSS feed reader to keep track of your favorite blogs, news sites, and release notes directly within AI Hub.",
+    why: "It centralizes your content consumption, preventing you from context-switching out to external RSS platforms while researching AI topics.",
+    where: "Access it via the 'Web Hub' dropdown in the top navigation → 'RSS Feeds', or navigate to /web-hub/rss.",
+    how: [
+      { step: "Subscribe", detail: "Click 'Add Feed', and paste the RSS or generic website URL (which will attempt to auto-discover feed URLs)." },
+      { step: "Browse", detail: "Feeds appear in the left sidebar. Click on any feed to view its latest articles on the right." },
+      { step: "Read", detail: "Click on an article title or thumbnail to open the full article directly in a new browser tab." }
+    ],
+    bestPractices: [
+      "Keep subscriptions curated to high-signal technical and AI blogs.",
+      "Periodically remove inactive or noisy feeds via the sidebar actions."
+    ],
+    tips: [
+      "You can visit the source feed homepage directly via the 'Source' link next to the feed name in the sidebar."
+    ],
+  },
+  {
+    id: "podcasts",
+    icon: <Headphones className="w-5 h-5" />,
+    title: "Podcasts",
+    color: "bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-200 dark:border-fuchsia-800",
+    badge: "Web Hub",
+    what: "A personalized podcast manager to bookmark and track AI/tech podcast series.",
+    why: "Many deep technical insights come from audio formats. Tracking them inside AI Hub alongside text resources keeps your knowledge map complete.",
+    where: "Access it via the 'Web Hub' dropdown in the top navigation → 'Podcasts', or navigate to /web-hub/podcasts.",
+    how: [
+      { step: "Add Podcast", detail: "Click 'Add Podcast', input the RSS feed URL (and optional custom details like Name/Description)." },
+      { step: "View Episodes", detail: "Click any Podcast card to slide out a side-drawer showing the chronological list of episodes." },
+      { step: "Listen", detail: "Click 'Go to Episode' to open the original source in your browser or podcast app." },
+      { step: "Track New", detail: "A 'New' badge will appear on podcast cards when fresh episodes drop since your last visit." }
+    ],
+    bestPractices: [
+      "Use this as a bookmark and discovery layer—listen on your preferred native audio platform when deep-working."
+    ],
+    tips: [
+      "The internal tracker automatically clears the 'New' badge once you open the episode list for a specific podcast."
     ],
   },
   {

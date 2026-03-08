@@ -5,6 +5,8 @@ export interface AppSettings {
   enableSkillHub: boolean;
   enableWebHub: boolean;
   enableStackBuilder: boolean;
+  enableRssFeeds?: boolean;
+  enablePodcasts?: boolean;
   enableBackgroundQuerying: boolean;
   webHubLayout: 'grid' | 'table';
   hasSeenWelcome: boolean;
@@ -15,6 +17,8 @@ const defaultSettings: AppSettings = {
   enableSkillHub: true,
   enableWebHub: true,
   enableStackBuilder: true,
+  enableRssFeeds: true,
+  enablePodcasts: true,
   enableBackgroundQuerying: false,
   webHubLayout: 'grid',
   hasSeenWelcome: false,

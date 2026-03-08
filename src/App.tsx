@@ -17,6 +17,9 @@ import CreateUseCase from "./pages/skills/CreateUseCase";
 import EditUseCase from "./pages/skills/EditUseCase";
 import Help from "./pages/Help";
 import WebHub from "./pages/WebHub";
+import Featured from "./pages/Featured";
+import RssFeeds from "./pages/RssFeeds";
+import Podcasts from "./pages/Podcasts";
 import AngularStackBuilder from './modules/angular-stack-builder/ui/AngularStackBuilder';
 
 export default function App() {
@@ -41,6 +44,10 @@ export default function App() {
         <Route path="/skills/use-cases/edit/:id" element={<EditUseCase />} />
         <Route path="/help" element={<Help />} />
         <Route path="/web-hub" element={<WebHub />} />
+        <Route path="/web-hub/resources" element={<WebHub />} />
+        <Route path="/web-hub/featured" element={<Featured />} />
+        <Route path="/web-hub/rss" element={<RssFeeds />} />
+        <Route path="/web-hub/podcasts" element={<Podcasts />} />
         <Route path="/angular-builder" element={<AngularStackBuilder />} />
       </Routes>
     </Router>

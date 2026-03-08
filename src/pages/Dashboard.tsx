@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { useRepoStore } from '../hooks/useRepoStore';
 import { useWebHubStore } from '../hooks/useWebHubStore';
+import { usePodcastStore } from '../hooks/usePodcastStore';
 import { useSkillStore } from '../hooks/useSkillStore';
 import { useUseCaseStore } from '../hooks/useUseCaseStore';
 import { useSettings } from '../hooks/useSettings';
@@ -10,7 +11,7 @@ import { WelcomeModal } from '../components/WelcomeModal';
 import { 
   Github, Globe, Cpu, Lightbulb, 
   ChevronRight, ExternalLink, Clock, 
-  Star, GitFork, Plus, Wrench, ArrowRight
+  Star, GitFork, Plus, Wrench, ArrowRight, Headphones, Rss
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -58,6 +59,7 @@ const SUMMARIES = [
 export default function Dashboard() {
   const { repos } = useRepoStore();
   const { links } = useWebHubStore();
+  const { podcasts } = usePodcastStore();
   const { skills } = useSkillStore();
   const { useCases } = useUseCaseStore();
   const { settings, updateSettings } = useSettings();
@@ -82,7 +84,7 @@ export default function Dashboard() {
   return (
     <Layout>
       <div className="space-y-8 animate-in fade-in duration-500">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Welcome Back</h1>
             <p className="text-muted-foreground mt-1">Here is what is happening across your AI Hub today.</p>
@@ -110,7 +112,7 @@ export default function Dashboard() {
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#dd0031]/10 text-[#dd0031] text-xs font-semibold uppercase tracking-wider mb-4 border border-[#dd0031]/20">
                 <Star className="w-3.5 h-3.5 fill-current" /> New Feature
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Angular Stack Builder</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2 mt-4 md:mt-0">Angular Stack Builder</h2>
               <p className="text-muted-foreground mb-6">
                 Fast-track your Angular application development. Generate a production-ready starting point configuring UI Frameworks, Tooling, and AI Hub integrations in a sleek 3-step visual wizard.
               </p>
@@ -124,9 +126,10 @@ export default function Dashboard() {
         )}
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <StatCard title="Repositories" value={repos.length} icon={Github} color="bg-blue-500" to="/my-repos" />
-          <StatCard title="Web Links" value={links.length} icon={Globe} color="bg-emerald-500" to="/web-hub" />
+          <StatCard title="Resources" value={links.length} icon={Globe} color="bg-emerald-500" to="/web-hub/resources" />
+          <StatCard title="Podcasts" value={podcasts.length} icon={Headphones} color="bg-fuchsia-500" to="/web-hub/podcasts" />
           <StatCard title="AI Skills" value={skills.length} icon={Cpu} color="bg-purple-500" to="/skills/library" />
           <StatCard title="Use Cases" value={useCases.length} icon={Lightbulb} color="bg-amber-500" to="/skills/use-cases" />
         </div>
