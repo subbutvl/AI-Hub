@@ -10,7 +10,7 @@ import { WelcomeModal } from '../components/WelcomeModal';
 import { 
   Github, Globe, Cpu, Lightbulb, 
   ChevronRight, ExternalLink, Clock, 
-  Star, GitFork, Plus
+  Star, GitFork, Plus, Wrench, ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -99,6 +99,29 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* New Feature Banner */}
+        {settings.enableStackBuilder && (
+          <div className="bg-gradient-to-r from-[#dd0031]/10 via-background to-background dark:from-[#dd0031]/20 dark:via-background dark:to-background border border-[#dd0031]/20 rounded-2xl p-6 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 transform translate-x-1/4 -translate-y-1/4">
+              <Wrench className="w-48 h-48 text-[#dd0031]/5 dark:text-[#dd0031]/10 group-hover:scale-110 transition-transform duration-700 ease-out" />
+            </div>
+            <div className="relative z-10 max-w-2xl">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#dd0031]/10 text-[#dd0031] text-xs font-semibold uppercase tracking-wider mb-4 border border-[#dd0031]/20">
+                <Star className="w-3.5 h-3.5 fill-current" /> New Feature
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Angular Stack Builder</h2>
+              <p className="text-muted-foreground mb-6">
+                Fast-track your Angular application development. Generate a production-ready starting point configuring UI Frameworks, Tooling, and AI Hub integrations in a sleek 3-step visual wizard.
+              </p>
+              <Button asChild className="bg-[#dd0031] hover:bg-[#dd0031]/90 text-white border-0 shadow-lg shadow-[#dd0031]/20 group/btn">
+                <Link to="/angular-builder">
+                  Try Stack Builder <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -102,6 +102,20 @@ export default function Settings() {
                 onCheckedChange={(checked) => updateSettings({ enableWebHub: checked })}
               />
             </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="enable-stack-builder" className="text-base font-medium">Enable ng Stack Builder</Label>
+                <p className="text-sm text-muted-foreground">
+                  Displays the Angular Stack Builder tool in the navigation menu.
+                </p>
+              </div>
+              <Switch 
+                id="enable-stack-builder" 
+                checked={settings.enableStackBuilder}
+                onCheckedChange={(checked) => updateSettings({ enableStackBuilder: checked })}
+              />
+            </div>
           </div>
 
           {/* Web Hub Features */}

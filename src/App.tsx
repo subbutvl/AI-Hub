@@ -17,6 +17,7 @@ import CreateUseCase from "./pages/skills/CreateUseCase";
 import EditUseCase from "./pages/skills/EditUseCase";
 import Help from "./pages/Help";
 import WebHub from "./pages/WebHub";
+import AngularStackBuilder from './modules/angular-stack-builder/ui/AngularStackBuilder';
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/skills/use-cases/edit/:id" element={<EditUseCase />} />
         <Route path="/help" element={<Help />} />
         <Route path="/web-hub" element={<WebHub />} />
+        <Route path="/angular-builder" element={<AngularStackBuilder />} />
       </Routes>
     </Router>
   );

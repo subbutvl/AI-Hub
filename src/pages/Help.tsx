@@ -198,6 +198,29 @@ const SECTIONS: Section[] = [
       "Hover over any link card to reveal quick-actions like Edit, Delete, and Open Link.",
     ],
   },
+  {
+    id: "stack-builder",
+    icon: <Wrench className="w-5 h-5" />,
+    title: "Angular Stack Builder",
+    color: "bg-[#dd0031]/10 text-[#dd0031] dark:text-[#f15e7c] border-[#dd0031]/20 dark:border-[#960021]",
+    badge: "Tool",
+    what: "A visual, step-by-step wizard to configure and generate production-ready Angular project codebases pre-integrated with AI Hub skills and best practices.",
+    why: "Setting up a new Angular project with the right linting, testing, UI framework, and AI tooling is time-consuming. Stack Builder automates this into a downloadable ZIP, saving you hours of boilerplate configuration.",
+    where: "Access it via the 'ng Stack Builder' link in the top navigation, or navigate to /angular-builder.",
+    how: [
+      { step: "Project Details", detail: "Configure your Angular version, CSS framework, PrimeNG, and IDE integrations." },
+      { step: "AI Intelligence", detail: "Embed specific AI Hub skills, built-in best practices, and community agent skills directly into your project's `.ai/` directory." },
+      { step: "Review & Generate", detail: "Double check your selections and click 'Download Project ZIP' to get your scaffolded codebase." }
+    ],
+    bestPractices: [
+      "Select IDE integrations to automatically generate workspace configurations for Cursor or VS Code.",
+      "Include 'Built-in Best Practices' to automatically scaffold a strong foundation for your team.",
+      "Use the 'Online Agent Skills' tab to add quick setup installation commands into your new project's README."
+    ],
+    tips: [
+      "You can click on the step numbers at the top of the wizard to quickly navigate between sections."
+    ],
+  },
 ];
 
 const FUTURE_ENHANCEMENTS = [
@@ -499,6 +522,7 @@ export default function Help() {
                   { label: "Pipeline Builder", to: "/skills/pipeline", icon: <GitMerge className="w-4 h-4" /> },
                   { label: "Use Cases", to: "/skills/use-cases", icon: <Lightbulb className="w-4 h-4" /> },
                   { label: "Web Hub", to: "/web-hub", icon: <Globe className="w-4 h-4" /> },
+                  { label: "ng Stack Builder", to: "/angular-builder", icon: <Wrench className="w-4 h-4" /> },
                   { label: "Settings", to: "/settings", icon: <Shield className="w-4 h-4" /> },
                 ].map(item => (
                   <Link

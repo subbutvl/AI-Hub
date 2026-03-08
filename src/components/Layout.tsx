@@ -110,6 +110,20 @@ export function Layout({ children }: LayoutProps) {
                 </Link>
               )}
 
+              {settings.enableStackBuilder && (
+                <Link
+                  to="/angular-builder"
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+                    location.pathname === "/angular-builder"
+                      ? "bg-[#dd0031]/10 text-[#dd0031]"
+                      : "text-muted-foreground hover:text-[#dd0031] hover:bg-[#dd0031]/5"
+                  }`}
+                >
+                  <Wrench className="w-4 h-4" />
+                  ng Stack Builder
+                </Link>
+              )}
+
               {/* Repo Hub Dropdown */}
               {settings.enableRepoHub && (
               <div className="relative" ref={dropdownRef}>

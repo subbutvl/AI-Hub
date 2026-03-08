@@ -4,6 +4,7 @@ export interface AppSettings {
   enableRepoHub: boolean;
   enableSkillHub: boolean;
   enableWebHub: boolean;
+  enableStackBuilder: boolean;
   enableBackgroundQuerying: boolean;
   webHubLayout: 'grid' | 'table';
   hasSeenWelcome: boolean;
@@ -13,6 +14,7 @@ const defaultSettings: AppSettings = {
   enableRepoHub: true,
   enableSkillHub: true,
   enableWebHub: true,
+  enableStackBuilder: true,
   enableBackgroundQuerying: false,
   webHubLayout: 'grid',
   hasSeenWelcome: false,
