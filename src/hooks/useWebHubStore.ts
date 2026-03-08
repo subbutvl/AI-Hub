@@ -153,10 +153,15 @@ export const useWebHubStore = create<WebHubStore>((set, get) => ({
   importLinks: (incoming) => {
     const existing = get().links;
     const existingUrls = new Set(existing.map((l) => l.url.toLowerCase()));
-    const existingIds = new Set(existing.map((l) => l.id));
     
-    const newLinks = incoming.filter((l) => 
-      !existingIds.has(l.id) && !existingUrls.has(l.url.toLowerCase())
+    // Normalize incoming links: auto-generate UUIDs for rows without an id
+    const normalized = incoming.map((l) => ({
+      ...l,
+      id: l.id && l.id.trim() !== '' ? l.id : crypto.randomUUID(),
+    }));
+
+    const newLinks = normalized.filter((l) =>
+      !existingUrls.has(l.url.toLowerCase())
     );
     
     if (newLinks.length > 0) {

@@ -126,20 +126,21 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border mt-2">
-            <Button 
-              className="flex-1 gap-2" 
+            <Button
+              className="flex-1 gap-2"
               onClick={onClose}
             >
               Get Started <ArrowRight className="w-4 h-4" />
             </Button>
-            <Button 
-              variant="outline" 
-              className="flex-1 gap-2 relative overflow-hidden group" 
+            <Button
+              variant="outline"
+              className="flex-1 gap-2 relative overflow-hidden group"
               onClick={handleLoadSampleData}
             >
-              <Upload className="w-4 h-4 group-hover:-translate-y-1 group-hover:opacity-0 transition-all absolute" />
-              <Database className="w-4 h-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all absolute" />
-              <span className="ml-6">{isLoaded ? "Data Loaded Successfully!" : "Load Sample Data"}</span>
+              <span className="">{isLoaded ? "Data Loaded Successfully!" : "Load Sample Data"}</span>
+              {/* <Upload className="w-4 h-4 group-hover:-translate-y-1 group-hover:opacity-0 transition-all absolute" />
+              <Database className="w-4 h-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all absolute" /> */}
+
             </Button>
           </div>
         </div>
