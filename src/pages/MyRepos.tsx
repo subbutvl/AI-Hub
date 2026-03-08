@@ -69,7 +69,7 @@ export default function MyRepos() {
     }
 
     // Sort
-    return safeRepos.sort((a, b) => {
+    const sorted = safeRepos.sort((a, b) => {
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name);
@@ -83,6 +83,13 @@ export default function MyRepos() {
           return 0;
       }
     });
+
+    // Always pin repos tagged "featured" to the top, preserving the sort order within each group
+    const isFeatured = (r: typeof sorted[0]) => r.tags.map(t => t.toLowerCase()).includes('featured');
+    return [
+      ...sorted.filter(isFeatured),
+      ...sorted.filter(r => !isFeatured(r)),
+    ];
   }, [repos, sortBy, searchQuery, selectedCategory, selectedTag]);
 
   // Reset pagination if filters change and we are out of bounds
