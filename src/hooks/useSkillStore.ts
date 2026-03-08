@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Skill } from '../types/skill';
-
-const STORAGE_KEY = 'ai_hub_skills';
+import { dbManager } from '../db';
+import { skills as skillsSchema } from '../db/schema';
+import { eq } from 'drizzle-orm';
 
 const DEFAULT_NOTE = "\n\n> **Note:** This prototype is NOT intended for production.";
 
@@ -84,46 +85,67 @@ export function useSkillStore() {
   const [skills, setSkills] = useState<Skill[]>([]);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    let existing: Skill[] = [];
+    // Only load once the database provider is completely ready
+    if (!dbManager.isInitialized) return;
     
-    if (stored) {
-      try {
-        existing = JSON.parse(stored);
-      } catch (e) {
-        console.error('Failed to parse stored skills', e);
-      }
-    }
+    // Load existing from SQLite
+    let existing = dbManager.db.select().from(skillsSchema).all();
 
     // Find any default skills that are not yet in the store (matched by name)
     const existingNames = new Set(existing.map(s => s.name));
     const missing = DEFAULT_SKILLS.filter(d => !existingNames.has(d.name));
 
     if (missing.length > 0) {
-      const merged = [...missing, ...existing];
-      setSkills(merged);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-    } else {
-      setSkills(existing);
+      // Insert missing defaults to DB
+      for (const m of missing) {
+        dbManager.db.insert(skillsSchema).values(m).run();
+      }
+      dbManager.save(); // flush to IndexedDB
+      
+      // Re-query ensuring pure local state matches remote reality exactly
+      existing = dbManager.db.select().from(skillsSchema).all();
     }
-  }, []);
+    
+    setSkills(existing);
+  }, [dbManager.isInitialized]); // React to initialization state (if we somehow boot late)
 
   const addSkill = (skill: Skill) => {
-    const updated = [skill, ...skills];
-    setSkills(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    try {
+      dbManager.db.insert(skillsSchema).values(skill).run();
+      dbManager.save();
+      setSkills([skill, ...skills]);
+    } catch(e) {
+      console.error("Failed to add skill", e);
+    }
   };
 
   const updateSkill = (updatedSkill: Skill) => {
-    const updated = skills.map(s => s.id === updatedSkill.id ? updatedSkill : s);
-    setSkills(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    try {
+      dbManager.db.update(skillsSchema)
+        .set(updatedSkill)
+        .where(eq(skillsSchema.id, updatedSkill.id))
+        .run();
+      dbManager.save();
+      
+      const updated = skills.map(s => s.id === updatedSkill.id ? updatedSkill : s);
+      setSkills(updated);
+    } catch(e) {
+       console.error("Failed to update skill", e);
+    }
   };
 
   const removeSkill = (id: string) => {
-    const updated = skills.filter(s => s.id !== id);
-    setSkills(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    try {
+      dbManager.db.delete(skillsSchema)
+        .where(eq(skillsSchema.id, id))
+        .run();
+      dbManager.save();
+      
+      const updated = skills.filter(s => s.id !== id);
+      setSkills(updated);
+    } catch(e) {
+       console.error("Failed to remove skill", e);
+    }
   };
 
   const getCategories = () => {

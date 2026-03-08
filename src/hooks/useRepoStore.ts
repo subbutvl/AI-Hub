@@ -1,43 +1,65 @@
 import { useState, useEffect } from 'react';
 import { SavedRepo } from '../types';
-
-const STORAGE_KEY = 'gme_saved_repos';
+import { dbManager } from '../db';
+import { repos as reposSchema } from '../db/schema';
+import { eq } from 'drizzle-orm';
 
 export function useRepoStore() {
   const [repos, setRepos] = useState<SavedRepo[]>([]);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setRepos(JSON.parse(stored));
-      } catch (e) {
-        console.error('Failed to parse stored repos', e);
-      }
+    if (!dbManager.isInitialized) return;
+
+    try {
+      const existing = dbManager.db.select().from(reposSchema).all() as unknown as SavedRepo[];
+      // Ordering by recency implicitly handled by JS unshift in old code, we'll keep the UI state order
+      setRepos(existing.reverse()); 
+    } catch (e) {
+      console.error('Failed to query repos', e);
     }
-  }, []);
+  }, [dbManager.isInitialized]);
 
   const addRepo = (repo: SavedRepo) => {
-    const updated = [repo, ...repos];
-    setRepos(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    try {
+      dbManager.db.insert(reposSchema).values(repo).run();
+      dbManager.save();
+      setRepos([repo, ...repos]);
+    } catch(e) {
+      console.error("Failed to add repo", e);
+    }
   };
 
   const updateRepo = (updatedRepo: SavedRepo) => {
-    const updated = repos.map(r => r.id === updatedRepo.id ? updatedRepo : r);
-    setRepos(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    try {
+      dbManager.db.update(reposSchema)
+        .set(updatedRepo)
+        .where(eq(reposSchema.id, updatedRepo.id))
+        .run();
+      dbManager.save();
+      
+      const updated = repos.map(r => r.id === updatedRepo.id ? updatedRepo : r);
+      setRepos(updated);
+    } catch(e) {
+      console.error("Failed to update repo", e);
+    }
   };
 
   const removeRepo = (id: string) => {
-    const updated = repos.filter(r => r.id !== id);
-    setRepos(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    try {
+      dbManager.db.delete(reposSchema)
+        .where(eq(reposSchema.id, id))
+        .run();
+      dbManager.save();
+
+      const updated = repos.filter(r => r.id !== id);
+      setRepos(updated);
+    } catch(e) {
+      console.error("Failed to remove repo", e);
+    }
   };
 
   const importRepos = (reposToImport: SavedRepo[]) => {
     setRepos(prevRepos => {
-      const existingIds = new Set(prevRepos.map(r => r.id));
       const newRepos = [...prevRepos];
       
       reposToImport.forEach(repo => {
@@ -45,16 +67,17 @@ export function useRepoStore() {
         
         const existingIndex = newRepos.findIndex(r => r.id === repo.id);
         if (existingIndex >= 0) {
-          // Update existing
-          newRepos[existingIndex] = repo;
+           // Update DB
+           dbManager.db.update(reposSchema).set(repo).where(eq(reposSchema.id, repo.id)).run();
+           newRepos[existingIndex] = repo;
         } else {
-          // Add new
-          newRepos.unshift(repo);
-          existingIds.add(repo.id);
+           // Insert DB
+           dbManager.db.insert(reposSchema).values(repo).run();
+           newRepos.unshift(repo);
         }
       });
       
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newRepos));
+      dbManager.save();
       return newRepos;
     });
   };

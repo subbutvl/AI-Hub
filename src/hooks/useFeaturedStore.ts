@@ -1,9 +1,12 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { WebLink } from '../types/webHub';
+import { dbManager } from '../db';
+import { featuredItems as featuredSchema } from '../db/schema';
+import { eq } from 'drizzle-orm';
 
 interface FeaturedStore {
   links: WebLink[];
+  init: () => void;
   addLink: (link: WebLink) => void;
   updateLink: (link: WebLink) => void;
   deleteLink: (id: string) => void;
@@ -12,72 +15,172 @@ interface FeaturedStore {
   getAllTags: () => string[];
 }
 
-export const useFeaturedStore = create<FeaturedStore>()(
-  persist(
-    (set, get) => ({
-      links: [
-        {
-          id: 'feat-1',
-          url: 'https://v0.dev',
-          name: 'v0 by Vercel',
-          type: 'tool',
-          category: 'UI Generation',
-          tags: ['react', 'tailwind', 'ai', 'vercel'],
-          addedAt: new Date().toISOString(),
-          description: 'AI-powered generative UI system built on top of React and Tailwind CSS.'
-        },
-        {
-          id: 'feat-2',
-          url: 'https://cursor.sh',
-          name: 'Cursor Editor',
-          type: 'tool',
-          category: 'IDE',
-          tags: ['ai-editor', 'copilot', 'development'],
-          addedAt: new Date().toISOString(),
-          description: 'The AI-first Code Editor.'
-        }
-      ],
+const DEFAULT_LINKS: WebLink[] = [
+  {
+    id: 'feat-1',
+    url: 'https://v0.dev',
+    name: 'v0 by Vercel',
+    type: 'tool',
+    category: 'UI Generation',
+    tags: ['react', 'tailwind', 'ai', 'vercel'],
+    addedAt: new Date().toISOString(),
+    description: 'AI-powered generative UI system built on top of React and Tailwind CSS.'
+  },
+  {
+    id: 'feat-2',
+    url: 'https://cursor.sh',
+    name: 'Cursor Editor',
+    type: 'tool',
+    category: 'IDE',
+    tags: ['ai-editor', 'copilot', 'development'],
+    addedAt: new Date().toISOString(),
+    description: 'The AI-first Code Editor.'
+  }
+];
 
-      addLink: (link) => {
-        const existing = get().links;
-        if (existing.some((l) => l.url.toLowerCase() === link.url.toLowerCase())) {
-          return;
-        }
-        set((state) => ({ links: [link, ...state.links] }));
-      },
+export const useFeaturedStore = create<FeaturedStore>((set, get) => ({
+  links: [],
 
-      updateLink: (link) =>
-        set((state) => ({
-          links: state.links.map((l) => (l.id === link.id ? link : l)),
-        })),
+  init: () => {
+    if (!dbManager.isInitialized) return;
+    
+    try {
+       // Convert raw DB format back to internal format (mostly matches natively)
+       let existing = dbManager.db.select().from(featuredSchema).all() as unknown as WebLink[];
+       
+       if (existing.length === 0) {
+         // Seed defaults
+         for (const link of DEFAULT_LINKS) {
+            dbManager.db.insert(featuredSchema).values({
+               id: link.id,
+               title: link.name,
+               url: link.url,
+               description: link.description,
+               thumbnailUrl: link.favicon, 
+               category: link.category,
+               type: link.type,
+               tags: link.tags,
+               addedAt: link.addedAt
+            }).run();
+         }
+         dbManager.save();
+         
+         existing = [...DEFAULT_LINKS];
+       } else {
+         // Remap raw DB to state (DB has title, state has name)
+         existing = existing.map((r: any) => ({
+             ...r,
+             name: r.title,
+             favicon: r.thumbnailUrl
+         }));
+       }
+       
+       set({ links: existing });
+    } catch(e) {
+       console.error("Failed to init FeaturedStore from DB", e);
+    }
+  },
 
-      deleteLink: (id) =>
-        set((state) => ({ links: state.links.filter((l) => l.id !== id) })),
+  addLink: (link) => {
+    const existing = get().links;
+    if (existing.some((l) => l.url.toLowerCase() === link.url.toLowerCase())) {
+      return;
+    }
+    
+    try {
+      dbManager.db.insert(featuredSchema).values({
+         id: link.id,
+         title: link.name,
+         url: link.url,
+         description: link.description,
+         thumbnailUrl: link.favicon,
+         category: link.category,
+         type: link.type,
+         tags: link.tags,
+         addedAt: link.addedAt
+      }).run();
+      dbManager.save();
+      
+      set((state) => ({ links: [link, ...state.links] }));
+    } catch(e) {
+      console.error("Failed to insert featured link", e);
+    }
+  },
 
-      importLinks: (incoming) => {
-        const existing = get().links;
-        const existingUrls = new Set(existing.map((l) => l.url.toLowerCase()));
-        const existingIds = new Set(existing.map((l) => l.id));
-        
-        const newLinks = incoming.filter((l) => 
-          !existingIds.has(l.id) && !existingUrls.has(l.url.toLowerCase())
-        );
-        
-        if (newLinks.length > 0) {
-          set({ links: [...newLinks, ...existing] });
-        }
-      },
+  updateLink: (link) => {
+    try {
+      dbManager.db.update(featuredSchema)
+        .set({
+           title: link.name,
+           url: link.url,
+           description: link.description,
+           thumbnailUrl: link.favicon,
+           category: link.category,
+           type: link.type,
+           tags: link.tags,
+           addedAt: link.addedAt
+        })
+        .where(eq(featuredSchema.id, link.id))
+        .run();
+      dbManager.save();
 
-      getCategories: () => {
-        const cats = new Set(get().links.map((l) => l.category).filter(Boolean));
-        return Array.from(cats).sort();
-      },
+      set((state) => ({
+        links: state.links.map((l) => (l.id === link.id ? link : l)),
+      }));
+    } catch(e) {
+      console.error("Failed to update featured link", e);
+    }
+  },
 
-      getAllTags: () => {
-        const tags = new Set(get().links.flatMap((l) => l.tags));
-        return Array.from(tags).sort();
-      },
-    }),
-    { name: 'featured-store' }
-  )
-);
+  deleteLink: (id) => {
+    try {
+       dbManager.db.delete(featuredSchema).where(eq(featuredSchema.id, id)).run();
+       dbManager.save();
+       set((state) => ({ links: state.links.filter((l) => l.id !== id) }));
+    } catch(e) {
+       console.error("Failed to delete featured link", e);
+    }
+  },
+
+  importLinks: (incoming) => {
+    const existing = get().links;
+    const existingUrls = new Set(existing.map((l) => l.url.toLowerCase()));
+    const existingIds = new Set(existing.map((l) => l.id));
+    
+    const newLinks = incoming.filter((l) => 
+      !existingIds.has(l.id) && !existingUrls.has(l.url.toLowerCase())
+    );
+    
+    if (newLinks.length > 0) {
+      try {
+         for (const link of newLinks) {
+            dbManager.db.insert(featuredSchema).values({
+               id: link.id,
+               title: link.name,
+               url: link.url,
+               description: link.description,
+               thumbnailUrl: link.favicon,
+               category: link.category,
+               type: link.type,
+               tags: link.tags,
+               addedAt: link.addedAt
+            }).run();
+         }
+         dbManager.save();
+         set({ links: [...newLinks, ...existing] });
+      } catch(e) {
+         console.error("Failed to import links", e);
+      }
+    }
+  },
+
+  getCategories: () => {
+    const cats = new Set(get().links.map((l) => l.category).filter(Boolean));
+    return Array.from(cats).sort();
+  },
+
+  getAllTags: () => {
+    const tags = new Set(get().links.flatMap((l) => l.tags));
+    return Array.from(tags).sort();
+  },
+}));
