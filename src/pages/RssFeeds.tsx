@@ -67,25 +67,109 @@ export default function RssFeeds() {
     }
   }, [activeFeed]);
 
+  /** Parse a raw RSS/Atom XML string into our RssResponse shape */
+  const parseRssXml = (xml: string, originalUrl: string): RssResponse | null => {
+    try {
+      const doc = new DOMParser().parseFromString(xml, 'text/xml');
+      const parseError = doc.querySelector('parsererror');
+      if (parseError) return null;
+
+      // Atom feed?
+      const isAtom = !!doc.querySelector('feed');
+      const items: RssItem[] = [];
+
+      if (isAtom) {
+        doc.querySelectorAll('entry').forEach(entry => {
+          const linkEl = entry.querySelector('link[rel="alternate"]') || entry.querySelector('link');
+          items.push({
+            title: entry.querySelector('title')?.textContent?.trim() || '',
+            pubDate: entry.querySelector('published,updated')?.textContent?.trim() || '',
+            link: linkEl?.getAttribute('href') || '',
+            guid: entry.querySelector('id')?.textContent?.trim() || '',
+            author: entry.querySelector('author name')?.textContent?.trim() || '',
+            thumbnail: '',
+            description: entry.querySelector('summary,content')?.textContent?.trim() || '',
+            content: entry.querySelector('content')?.textContent?.trim() || '',
+          });
+        });
+        const feedTitle = doc.querySelector('feed > title')?.textContent?.trim() || '';
+        const feedLink = doc.querySelector('feed > link[rel="alternate"]')?.getAttribute('href') || originalUrl;
+        return { status: 'ok', feed: { url: originalUrl, title: feedTitle, link: feedLink, author: '', description: doc.querySelector('feed > subtitle')?.textContent?.trim() || '', image: '' }, items };
+      }
+
+      // RSS 2.0
+      doc.querySelectorAll('item').forEach(item => {
+        const enclosure = item.querySelector('enclosure[type^="image"]');
+        const mediaThumbnail = item.getElementsByTagNameNS('http://search.yahoo.com/mrss/', 'thumbnail')[0];
+        items.push({
+          title: item.querySelector('title')?.textContent?.trim() || '',
+          pubDate: item.querySelector('pubDate')?.textContent?.trim() || '',
+          link: item.querySelector('link')?.textContent?.trim() || item.querySelector('link')?.nextSibling?.textContent?.trim() || '',
+          guid: item.querySelector('guid')?.textContent?.trim() || '',
+          author: item.querySelector('author,creator')?.textContent?.trim() || '',
+          thumbnail: mediaThumbnail?.getAttribute('url') || enclosure?.getAttribute('url') || '',
+          description: item.querySelector('description')?.textContent?.trim() || '',
+          content: item.querySelector('encoded')?.textContent?.trim() || '',
+        });
+      });
+      const channel = doc.querySelector('channel');
+      return {
+        status: 'ok',
+        feed: {
+          url: originalUrl,
+          title: channel?.querySelector('title')?.textContent?.trim() || '',
+          link: channel?.querySelector('link')?.textContent?.trim() || originalUrl,
+          author: '',
+          description: channel?.querySelector('description')?.textContent?.trim() || '',
+          image: channel?.querySelector('image url')?.textContent?.trim() || '',
+        },
+        items,
+      };
+    } catch {
+      return null;
+    }
+  };
+
   const fetchFeed = async (url: string) => {
     setLoading(true);
     setError('');
     setFeedData(null);
+
+    // ── Stage 1: rss2json ──────────────────────────────────────────────────
     try {
-      // Using rss2json to bypass CORS issues when fetching XML feeds directly in browser
       const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
-      const data = await res.json();
-      if (data.status === 'ok') {
-        setFeedData(data);
-      } else {
-        setError('Failed to load this RSS feed. It might be invalid or unsupported.');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.status === 'ok') {
+          setFeedData(data);
+          setLoading(false);
+          return;
+        }
       }
-    } catch (err) {
-      setError('An error occurred while fetching the feed.');
-    } finally {
-      setLoading(false);
+    } catch {
+      // fall through to next proxy
     }
+
+    // ── Stage 2: allorigins.win → native XML parse ─────────────────────────
+    try {
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxyUrl);
+      if (!res.ok) throw new Error('allorigins fetch failed');
+      const json = await res.json();
+      const parsed = parseRssXml(json.contents, url);
+      if (parsed) {
+        setFeedData(parsed);
+        setLoading(false);
+        return;
+      }
+    } catch {
+      // fall through to error
+    }
+
+    setError('Unable to load this RSS feed. The feed may be behind a paywall or require authentication. Try opening it directly in your browser.');
+    setLoading(false);
   };
+
 
   const handleAddFeed = () => {
     if (!newUrl.trim() || !newName.trim()) return;
